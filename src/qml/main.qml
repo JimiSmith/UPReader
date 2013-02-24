@@ -1,11 +1,11 @@
 import QtQuick 2.0
 import QtWebKit 3.0
-import QGReader 0.1
+import UPReader 0.1
 import Ubuntu.Components 0.1
 
 MainView {
     id: rootItem
-    applicationName: "Google Reader"
+    applicationName: "UP Reader"
     width: units.gu(40)
     height: units.gu(75)
 

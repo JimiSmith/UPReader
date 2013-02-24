@@ -1,6 +1,6 @@
 import QtQuick 2.0
 import Ubuntu.Components 0.1
-import QGReader 0.1
+import UPReader 0.1
 
 Page {
     property var subscription

@@ -1,4 +1,4 @@
-project(QGReader)
+project(UPReader)
 
 cmake_minimum_required(VERSION 2.8.8)
 
@@ -19,13 +19,13 @@ include_directories(
 )
 
 # We add our source code here
-set(qgreader_src src/filteredcontentmodel.cpp
+set(upreader_src src/filteredcontentmodel.cpp
                  src/contentmodel.cpp
                  src/feedmodel.cpp
                  src/feedparser.cpp
                  src/subscription.cpp
                  src/manager.cpp
-                 src/qgreader.cpp
+                 src/upreader.cpp
                  src/main.cpp)
 
 add_custom_target(QmlFiles ALL ${CMAKE_COMMAND}
@@ -36,10 +36,7 @@ add_custom_target(QmlFiles ALL ${CMAKE_COMMAND}
                           src/qml/SubList.qml
                           src/qml/WebAuth.qml)
 
-# qt4_add_resources(qgreader_src resources.qrc)
-# qt4_automoc(${qgreader_src})
-
 # Now make sure all files get to the right place
-add_executable(QGReader ${qgreader_src})
+add_executable(UPReader ${upreader_src})
 
-qt5_use_modules(QGReader Quick Qml Gui Core Xml)
+qt5_use_modules(UPReader Quick Qml Gui Core Xml)

@@ -18,8 +18,8 @@
 */
 
 
-#ifndef QGREADER_H
-#define QGREADER_H
+#ifndef UPREADER_H
+#define UPREADER_H
 
 #include <QtCore/QObject>
 #include <QtCore/QString>
@@ -59,4 +59,4 @@ signals:
 	void haveAccessToken();
 };
 
-#endif // QGREADER_H
+#endif // UPREADER_H

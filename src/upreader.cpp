@@ -24,7 +24,7 @@
 #include <QtCore/QSettings>
 #include <QJsonDocument>
 
-#include "qgreader.h"
+#include "upreader.h"
 #include <QtCore/qdatetime.h>
 
 Auth::Auth(QObject* parent)
@@ -40,7 +40,7 @@ Auth::~Auth()
 
 void Auth::getAuth()
 {
-	QSettings settings("mrsmith", "qgreader");
+    QSettings settings("mrsmith", "upreader");
 	//lets get the access token
 	settings.beginGroup("auth");
 	m_refreshToken = settings.value("refreshtoken", QString("")).toString();
@@ -91,7 +91,7 @@ void Auth::replyFinshed(QNetworkReply* reply)
 			QVariantMap m = result.toMap();
 			m_refreshToken = m.value("refresh_token").toString();
 			m_accessToken = m.value("access_token").toString();
-			QSettings settings("mrsmith", "qgreader");
+            QSettings settings("mrsmith", "upreader");
 			//lets save the access token
 			settings.beginGroup("auth");
 			settings.setValue("refreshtoken", m_refreshToken);
@@ -109,4 +109,4 @@ void Auth::replyFinshed(QNetworkReply* reply)
 	reply->deleteLater();
 }
 
-#include "qgreader.moc"
+#include "upreader.moc"
