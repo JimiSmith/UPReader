@@ -44,9 +44,11 @@ public:
 	virtual bool canFetchMore(const QModelIndex& parent) const { qDebug() << "checking" << m_subscription->getTitle() << m_subscription->canFetchMore(); return m_subscription->canFetchMore(); }
 	virtual void fetchMore(const QModelIndex& parent);
 
+    Q_INVOKABLE Article* getArticle(int ind);
+
 private:
 	Subscription* m_subscription;
-	QVariantList m_allItems;
+    ArticleList* m_allItems;
 
 private slots:
 	void updated();

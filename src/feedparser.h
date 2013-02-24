@@ -26,6 +26,8 @@
 #include <QtCore/QVariant>
 
 class QDomElement;
+class ArticleList;
+class Article;
 
 class FeedParser : public QObject
 {
@@ -35,9 +37,9 @@ public:
 	explicit FeedParser(QObject* parent = 0);
 	virtual ~FeedParser();
 
-	QVariantMap parseFeed(QString atom);
+    ArticleList* parseFeed(QString atom);
 private:
-	QVariantMap parseEntry(QDomElement entry);
+    Article* parseEntry(QDomElement entry);
 	QString unescape(QString s);
 };
 

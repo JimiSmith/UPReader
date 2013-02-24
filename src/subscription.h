@@ -29,6 +29,8 @@
 
 #include "feedparser.h"
 
+class ArticleList;
+
 class Subscription : public QObject
 {
 	Q_OBJECT
@@ -65,7 +67,7 @@ public:
 
 	int getUnread() { return m_unread; }
 
-    QVariantMap getFeedData() { return m_feedData; }
+    ArticleList* getFeedData() { return m_feedData; }
 
 	bool canFetchMore() { return !m_continuation.isEmpty(); }
 
@@ -82,7 +84,7 @@ private:
 	QNetworkAccessManager* m_netMan;
 	QMap<QNetworkReply*, opType> m_operations;
 	FeedParser* m_parser;
-    QVariantMap m_feedData;
+    ArticleList* m_feedData;
 	int m_unread;
 
 public slots:

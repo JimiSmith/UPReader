@@ -24,6 +24,7 @@
 #include "upreader.h"
 #include "feedmodel.h"
 #include "filteredcontentmodel.h"
+#include "article.h"
 
 int main(int argc, char *argv[])
 {
@@ -36,6 +37,7 @@ int main(int argc, char *argv[])
     qmlRegisterType<FeedModel>("UPReader", 0, 1, "FeedModel");
     qmlRegisterType<FilteredContentModel>("UPReader", 0, 1, "ContentModel");
     qmlRegisterType<Subscription>("UPReader", 0, 1, "Subscription");
+    qmlRegisterType<Article>("UPReader", 0, 1, "Article");
 	qRegisterMetaType<QList<Subscription*> >("QList<Subscription*>");
 	qRegisterMetaType<Subscription* >("Subscription*");
     viewer->setSource(QUrl("../src/qml/main.qml"));

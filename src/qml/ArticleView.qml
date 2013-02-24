@@ -19,24 +19,29 @@
 
 import QtQuick 2.0
 import Ubuntu.Components 0.1
+import QtWebKit 3.0
 import UPReader 0.1
 
-PageStack {
-    id: rootItem
-    anchors.fill: parent
+Page {
+    property var article
 
-    Component.onCompleted: rootItem.push(page0)
+    tools: ToolbarActions {
+        Action {
+            objectName: "action"
+            text: i18n.tr("Open in browser")
 
-    Page {
-        id: page0
-        title: "Subscriptions"
-        anchors.fill: parent
-        SubList {
-            anchors.fill: parent
-            onItemClicked: {
-                rootItem.push(Qt.resolvedUrl('ArticleListView.qml'), {subscription: subscription});
+            onTriggered: {
             }
         }
     }
 
+    title: article.title
+    
+    WebView {
+        id: webView
+        anchors.fill: parent
+        Component.onCompleted: {
+            loadHtml(article.content, article.articleDomainName, "");
+        }
+    }
 }

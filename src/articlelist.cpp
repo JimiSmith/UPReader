@@ -17,26 +17,36 @@
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
-import QtQuick 2.0
-import Ubuntu.Components 0.1
-import UPReader 0.1
+#include <QtCore/QDebug>
 
-PageStack {
-    id: rootItem
-    anchors.fill: parent
+#include "articlelist.h"
 
-    Component.onCompleted: rootItem.push(page0)
+ArticleList::ArticleList(QObject* parent)
+: QObject(parent)
+{
+}
 
-    Page {
-        id: page0
-        title: "Subscriptions"
-        anchors.fill: parent
-        SubList {
-            anchors.fill: parent
-            onItemClicked: {
-                rootItem.push(Qt.resolvedUrl('ArticleListView.qml'), {subscription: subscription});
-            }
-        }
-    }
+ArticleList::~ArticleList()
+{
 
+}
+
+QString ArticleList::continuationToken() const
+{
+    return m_continuationToken;
+}
+
+void ArticleList::setContinuationToken(const QString &continuationToken)
+{
+    m_continuationToken = continuationToken;
+}
+
+QList<Article *> ArticleList::articleList() const
+{
+    return m_articleList;
+}
+
+void ArticleList::setArticleList(const QList<Article *> &articleList)
+{
+    m_articleList = articleList;
 }

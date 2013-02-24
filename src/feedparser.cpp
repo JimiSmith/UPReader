@@ -20,6 +20,8 @@
 #include <QtCore/QDebug>
 
 #include "feedparser.h"
+#include "articlelist.h"
+#include "article.h"
 
 FeedParser::FeedParser(QObject* parent)
 	: QObject(parent)
@@ -77,35 +79,35 @@ there are then a list of categories which hold the items state(unread/read) and 
 
 */
 
-QVariantMap FeedParser::parseFeed(QString atom)
+ArticleList* FeedParser::parseFeed(QString atom)
 {
 	QDomDocument doc;
-	QVariantMap map;
-	QVariantList entries;
-	if(!doc.setContent(atom)) return QVariantMap();
+    ArticleList* map = new ArticleList();
+    QList<Article*> entries;
+    if(!doc.setContent(atom)) return new ArticleList();
 
 	QDomElement root = doc.documentElement();
-	if(root.tagName() != "feed") return QVariantMap();
+    if(root.tagName() != "feed") return new ArticleList();
 	QDomNodeList l = root.childNodes();
 	for(int i = 0; i < l.length(); ++i) {
 		QDomNode n = l.at(i);
 		QDomElement e = n.toElement();
 		if(!e.isNull()) {
 			if(e.tagName() == "gr:continuation") { //the first element we're interested in is the gr:continuation element
-				map.insert("cont", e.text());
+                map->setContinuationToken(e.text());
 			} else if(e.tagName() == "entry") { //next is the entry element
-				QVariantMap entry = parseEntry(e);
+                Article* entry = parseEntry(e);
 				entries.append(entry);
 			}
 		}
 	}
-	map.insert("entries", entries);
+    map->setArticleList(entries);
 	return map;
 }
 
-QVariantMap FeedParser::parseEntry(QDomElement entry)
+Article* FeedParser::parseEntry(QDomElement entry)
 {
-	QVariantMap map;
+    Article* article = new Article();
 	QDomNodeList l = entry.childNodes();
 	for(int i = 0; i < l.length(); ++i) {
 		QDomNode n = l.at(i);
@@ -113,33 +115,31 @@ QVariantMap FeedParser::parseEntry(QDomElement entry)
 		if(!e.isNull()) {
 			if(e.tagName() == "category") { //the category tag contains the read status
 				if(e.attribute("term").contains("/state/com.google/")) { //this will represent one of googles states(e.g. read)
-					QStringList l = map.value("state").toStringList();
-					QString state = e.attribute("term").split("/").last();
-					l.append(state);
-					map["state"] = l;
+                    QString state = e.attribute("term").split("/").last();
+                    article->addState(state);
 				} else { //tag name?
-					map.insert("tag", e.attribute("term"));
+                    article->addState(e.attribute("term"));
 				}
 			} else if(e.tagName() == "title") {
-				map.insert("titleType", e.attribute("type"));
-				map.insert("titleText", e.text());
+//				map.insert("titleType", e.attribute("type"));
+                article->setTitle(e.text());
 			} else if(e.tagName() == "published") {
 				QDateTime t = QDateTime::fromString("yyyy-MM-ddTHH:mm:ssZ"); //2011-05-18T21:05:53Z
-				map.insert("published", t);
+                article->setPublished(t);
 			} else if(e.tagName() == "updated") {
 				QDateTime t = QDateTime::fromString("yyyy-MM-ddTHH:mm:ssZ"); //2011-05-18T21:05:53Z
-				map.insert("updated", t);
+                article->setUpdated(t);
 			} else if(e.tagName() == "link") {
-				map.insert("link", e.attribute("href"));
+                article->setLink(e.attribute("href"));
 			} else if((e.tagName() == "content") || (e.tagName() == "summary")) { //the fun part
-				map.insert("origDomain", e.attribute("xml:base"));
+                article->setArticleDomainName(e.attribute("xml:base"));
 				QString type = e.attribute("type");
-				map.insert("contentType", type);
+                article->setContentType(type);
 				QString content = e.text();
 				if(type == "html" || type == "text") {
 					content = unescape(content);
 				}
-				map.insert("contentText", content);
+                article->setContent(content);
 			} else if(e.tagName() == "author") {
 				//lets find the name of the author - not interested in the other stuff that can be here as well
 				QString author;
@@ -153,11 +153,11 @@ QVariantMap FeedParser::parseEntry(QDomElement entry)
 						}
 					}
 				}
-				map.insert("author", author);
+                article->setAuthor(author);
 			}
 		}
 	}
-	return map;
+    return article;
 }
 
 QString FeedParser::unescape(QString s)

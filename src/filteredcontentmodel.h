@@ -49,6 +49,8 @@ public:
 // 	virtual bool canFetchMore(const QModelIndex& parent) const { return sourceModel()->canFetchMore(parent); }
 	virtual void fetchMore(const QModelIndex& parent) { sourceModel()->fetchMore(parent);}
 
+    Q_INVOKABLE Article* getArticle(int ind) { return qobject_cast<ContentModel*>(sourceModel())->getArticle(ind); }
+
 private:
 	QString m_currentFeed;
 	

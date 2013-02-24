@@ -16,9 +16,12 @@
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
+
 #include <QtCore/QDebug>
 
 #include "contentmodel.h"
+#include "article.h"
+#include "articlelist.h"
 
 ContentModel::ContentModel(QObject* parent): QAbstractListModel(parent)
 {
@@ -41,18 +44,18 @@ QHash<int, QByteArray> ContentModel::roleNames() const {
 
 QVariant ContentModel::data(const QModelIndex& index, int role) const
 {
-    if(!index.isValid() || index.row() >= m_allItems.count()) return QVariant();
+    if(!index.isValid() || index.row() >= m_allItems->articleList().count()) return QVariant();
 
-	QVariantMap entry = m_allItems.at(index.row()).toMap();
+    Article* entry = m_allItems->articleList().at(index.row());
 	switch(role) {
 		case titleRole: {
-            return entry.value("titleText");
+            return entry->title();
 		}
 		case contentRole: {
-            return entry.value("contentText");
+            return entry->content();
 		}
 		case authorRole: {
-            return entry.value("author");
+            return entry->author();
 		}
 		case readRole: {
             return true;
@@ -63,12 +66,8 @@ QVariant ContentModel::data(const QModelIndex& index, int role) const
 int ContentModel::rowCount(const QModelIndex& parent) const
 {
     if (m_subscription != NULL) {
-        QVariantMap feedData = m_subscription->getFeedData();
-        if (!feedData.value("entries").isNull()) {
-            return feedData.value("entries").toList().length();
-        }
-
-        return 0;
+        ArticleList* feedData = m_subscription->getFeedData();
+        return feedData->articleList().length();
     }
 }
 
@@ -85,15 +84,14 @@ void ContentModel::setSubscription(Subscription* sub)
 void ContentModel::updated()
 {
 	beginResetModel();
-    m_allItems = m_subscription->getFeedData().value("entries").toList();
+    m_allItems = m_subscription->getFeedData();
 	endResetModel();
 }
 
 void ContentModel::itemsAppended(int i)
 {
-    m_allItems = m_subscription->getFeedData().value("entries").toList();
-	qDebug() << "old size:" << i << "new size:" << m_allItems.size();
-	beginInsertRows(QModelIndex(), i, m_allItems.size() - 1);
+    m_allItems = m_subscription->getFeedData();
+    beginInsertRows(QModelIndex(), i, m_allItems->articleList().size() - 1);
 	endInsertRows();
 }
 
@@ -101,6 +99,10 @@ void ContentModel::fetchMore(const QModelIndex& parent)
 {
 	qDebug() << "fetching more";
 	m_subscription->fetchMore();
+}
+
+Article* ContentModel::getArticle(int ind) {
+    return m_allItems->articleList().at(ind);
 }
 
 #include "contentmodel.moc"

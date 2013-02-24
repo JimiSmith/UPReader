@@ -20,6 +20,8 @@ include_directories(
 
 # We add our source code here
 set(upreader_src src/filteredcontentmodel.cpp
+                 src/article.cpp
+                 src/articlelist.cpp
                  src/contentmodel.cpp
                  src/feedmodel.cpp
                  src/feedparser.cpp
@@ -30,7 +32,8 @@ set(upreader_src src/filteredcontentmodel.cpp
 
 add_custom_target(QmlFiles ALL ${CMAKE_COMMAND}
                   SOURCES src/qml/main.qml
-                          src/qml/ContentView.qml
+                          src/qml/ArticleListView.qml
+                          src/qml/ArticleView.qml
                           src/qml/ReaderView.qml
                           src/qml/StoryDelegate.qml
                           src/qml/SubList.qml

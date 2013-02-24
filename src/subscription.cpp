@@ -17,9 +17,11 @@
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 #include <QtCore/QDebug>
+#include <QtCore/qdatetime.h>
 
 #include "subscription.h"
-#include <QtCore/qdatetime.h>
+#include "article.h"
+#include "articlelist.h"
 
 Subscription::Subscription() {
     Subscription("", 0);
@@ -143,11 +145,10 @@ void Subscription::replyFinshed(QNetworkReply* reply)
             case refreshOP: {
 				m_atomText = QString::fromUtf8(reply->readAll());
 				m_feedData = m_parser->parseFeed(m_atomText);
-				m_continuation = m_feedData.value("cont").toString();
+                m_continuation = m_feedData->continuationToken();
 				m_unread = 0;
-				foreach(QVariant v, m_feedData.value("entries").toList()) {
-					QVariantMap m = v.toMap();
-					if(!m.value("state").toList().contains("read")) {
+                foreach(Article* v, m_feedData->articleList()) {
+                    if(!v->state().contains("read")) {
 						m_unread++;
 					}
 				}
@@ -156,13 +157,13 @@ void Subscription::replyFinshed(QNetworkReply* reply)
 			}
 			case getMoreOP: {
 				QString r = QString::fromUtf8(reply->readAll());
-				int i = m_feedData.value("entries").toList().size();
-				QVariantMap feedData = m_parser->parseFeed(r);
-				m_feedData["cont"] = feedData.value("cont");
-				QVariantList l = m_feedData.value("entries").toList();
-				l.append(feedData.value("entries").toList());
-				m_feedData["entries"] = l;
-				m_continuation = m_feedData.value("cont").toString();
+                int i = m_feedData->articleList().size();
+                ArticleList* feedData = m_parser->parseFeed(r);
+                m_feedData->continuationToken() = feedData->continuationToken();
+                QList<Article*> l = m_feedData->articleList();
+                l.append(feedData->articleList());
+                m_feedData->articleList() = l;
+                m_continuation = m_feedData->continuationToken();
 				emit itemsAppended(i);
 				break;
 			}

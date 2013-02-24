@@ -19,6 +19,7 @@
 
 import QtQuick 2.0
 import Ubuntu.Components 0.1
+import Ubuntu.Components.ListItems 0.1 as ListItem
 import UPReader 0.1
 
 Page {
@@ -47,6 +48,12 @@ Page {
         model: ContentModel {
             id: contentModel
         }
-        delegate: StoryDelegate{}
+        delegate: ListItem.Standard {
+            text: title
+            onClicked: {
+                pageStack.push(Qt.resolvedUrl('ArticleView.qml'), {article: contentModel.getArticle(index)})
+            }
+        }
+
     }
 }
