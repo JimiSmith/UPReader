@@ -29,31 +29,43 @@ class Subscription;
 
 class FilteredContentModel : public QSortFilterProxyModel
 {
-	Q_OBJECT
-	Q_PROPERTY(Subscription* subscription READ getSubscription WRITE setSubscription)
-	Q_PROPERTY(QString currentFeed READ getCurrentFeed WRITE setCurrentFeed)
+    Q_OBJECT
+    Q_PROPERTY(Subscription* subscription READ getSubscription WRITE setSubscription)
+    Q_PROPERTY(QString currentFeed READ getCurrentFeed WRITE setCurrentFeed)
 
 public:
-	FilteredContentModel(QObject* parent = 0);
-	virtual ~FilteredContentModel();
+    FilteredContentModel(QObject* parent = 0);
+    virtual ~FilteredContentModel();
 
-	Subscription* getSubscription() { return qobject_cast<ContentModel*>(sourceModel())->getSubscription(); }
-	void setSubscription(Subscription* sub) { qobject_cast<ContentModel*>(sourceModel())->setSubscription(sub); }
-	
-	QString getCurrentFeed() { return m_currentFeed; }
-	void setCurrentFeed(QString feed);
+    Subscription* getSubscription() {
+        return qobject_cast<ContentModel*>(sourceModel())->getSubscription();
+    }
+    void setSubscription(Subscription* sub) {
+        qobject_cast<ContentModel*>(sourceModel())->setSubscription(sub);
+    }
 
-	virtual bool filterAcceptsRow(int source_row, const QModelIndex& source_parent) const;
-	
-	virtual bool canFetchMore(const QModelIndex& parent) const { return false; }
+    QString getCurrentFeed() {
+        return m_currentFeed;
+    }
+    void setCurrentFeed(QString feed);
+
+    virtual bool filterAcceptsRow(int source_row, const QModelIndex& source_parent) const;
+
+    virtual bool canFetchMore(const QModelIndex& parent) const {
+        return false;
+    }
 // 	virtual bool canFetchMore(const QModelIndex& parent) const { return sourceModel()->canFetchMore(parent); }
-	virtual void fetchMore(const QModelIndex& parent) { sourceModel()->fetchMore(parent);}
+    virtual void fetchMore(const QModelIndex& parent) {
+        sourceModel()->fetchMore(parent);
+    }
 
-    Q_INVOKABLE Article* getArticle(int ind) { return qobject_cast<ContentModel*>(sourceModel())->getArticle(ind); }
+    Q_INVOKABLE Article* getArticle(int ind) {
+        return qobject_cast<ContentModel*>(sourceModel())->getArticle(ind);
+    }
 
 private:
-	QString m_currentFeed;
-	
+    QString m_currentFeed;
+
 };
 
 #endif // FILTEREDCONTENTMODEL_H

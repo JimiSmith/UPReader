@@ -30,10 +30,11 @@ ContentModel::ContentModel(QObject* parent): QAbstractListModel(parent)
 
 ContentModel::~ContentModel()
 {
-	
+
 }
 
-QHash<int, QByteArray> ContentModel::roleNames() const {
+QHash<int, QByteArray> ContentModel::roleNames() const
+{
     QHash<int, QByteArray> roles;
     roles[titleRole] = "title";
     roles[contentRole] = "content";
@@ -47,20 +48,20 @@ QVariant ContentModel::data(const QModelIndex& index, int role) const
     if(!index.isValid() || index.row() >= m_allItems->articleList().count()) return QVariant();
 
     Article* entry = m_allItems->articleList().at(index.row());
-	switch(role) {
-		case titleRole: {
-            return entry->title();
-		}
-		case contentRole: {
-            return entry->content();
-		}
-		case authorRole: {
-            return entry->author();
-		}
-		case readRole: {
-            return true;
-		}
-	}
+    switch(role) {
+    case titleRole: {
+        return entry->title();
+    }
+    case contentRole: {
+        return entry->content();
+    }
+    case authorRole: {
+        return entry->author();
+    }
+    case readRole: {
+        return true;
+    }
+    }
 }
 
 int ContentModel::rowCount(const QModelIndex& parent) const
@@ -73,35 +74,36 @@ int ContentModel::rowCount(const QModelIndex& parent) const
 
 void ContentModel::setSubscription(Subscription* sub)
 {
-	beginResetModel();
-	m_subscription = sub;
-	connect(m_subscription, SIGNAL(updated()), this, SLOT(updated()));
-	connect(m_subscription, SIGNAL(itemsAppended(int)), this, SLOT(itemsAppended(int)));
+    beginResetModel();
+    m_subscription = sub;
+    connect(m_subscription, SIGNAL(updated()), this, SLOT(updated()));
+    connect(m_subscription, SIGNAL(itemsAppended(int)), this, SLOT(itemsAppended(int)));
     updated();
-	endResetModel();
+    endResetModel();
 }
 
 void ContentModel::updated()
 {
-	beginResetModel();
+    beginResetModel();
     m_allItems = m_subscription->getFeedData();
-	endResetModel();
+    endResetModel();
 }
 
 void ContentModel::itemsAppended(int i)
 {
     m_allItems = m_subscription->getFeedData();
     beginInsertRows(QModelIndex(), i, m_allItems->articleList().size() - 1);
-	endInsertRows();
+    endInsertRows();
 }
 
 void ContentModel::fetchMore(const QModelIndex& parent)
 {
-	qDebug() << "fetching more";
-	m_subscription->fetchMore();
+    qDebug() << "fetching more";
+    m_subscription->fetchMore();
 }
 
-Article* ContentModel::getArticle(int ind) {
+Article* ContentModel::getArticle(int ind)
+{
     return m_allItems->articleList().at(ind);
 }
 

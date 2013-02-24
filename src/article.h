@@ -78,7 +78,7 @@ private:
     QString m_content;
     QDateTime m_published;
     QDateTime m_updated;
-    
+
 signals:
     void updated();
 };

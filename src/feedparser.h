@@ -31,16 +31,16 @@ class Article;
 
 class FeedParser : public QObject
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-	explicit FeedParser(QObject* parent = 0);
-	virtual ~FeedParser();
+    explicit FeedParser(QObject* parent = 0);
+    virtual ~FeedParser();
 
     ArticleList* parseFeed(QString atom);
 private:
     Article* parseEntry(QDomElement entry);
-	QString unescape(QString s);
+    QString unescape(QString s);
 };
 
 #endif // FEEDPARSER_H

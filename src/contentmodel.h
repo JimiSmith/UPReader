@@ -27,32 +27,37 @@
 
 class ContentModel : public QAbstractListModel
 {
-	Q_OBJECT
-	enum roles { titleRole = Qt::UserRole + 1, contentRole, authorRole, readRole };
+    Q_OBJECT
+    enum roles { titleRole = Qt::UserRole + 1, contentRole, authorRole, readRole };
 
 public:
     explicit ContentModel(QObject* parent = 0);
-	virtual ~ContentModel();
-	
+    virtual ~ContentModel();
+
     virtual QHash<int, QByteArray> roleNames() const;
-	virtual QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const;
-	virtual int rowCount(const QModelIndex& parent = QModelIndex()) const;
+    virtual QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const;
+    virtual int rowCount(const QModelIndex& parent = QModelIndex()) const;
 
-	Subscription* getSubscription() { return m_subscription; }
-	void setSubscription(Subscription* sub);
+    Subscription* getSubscription() {
+        return m_subscription;
+    }
+    void setSubscription(Subscription* sub);
 
-	virtual bool canFetchMore(const QModelIndex& parent) const { qDebug() << "checking" << m_subscription->getTitle() << m_subscription->canFetchMore(); return m_subscription->canFetchMore(); }
-	virtual void fetchMore(const QModelIndex& parent);
+    virtual bool canFetchMore(const QModelIndex& parent) const {
+        qDebug() << "checking" << m_subscription->getTitle() << m_subscription->canFetchMore();
+        return m_subscription->canFetchMore();
+    }
+    virtual void fetchMore(const QModelIndex& parent);
 
     Q_INVOKABLE Article* getArticle(int ind);
 
 private:
-	Subscription* m_subscription;
+    Subscription* m_subscription;
     ArticleList* m_allItems;
 
 private slots:
-	void updated();
-	void itemsAppended(int i);
+    void updated();
+    void itemsAppended(int i);
 };
 
 #endif // CONTENTMODEL_H

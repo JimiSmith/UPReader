@@ -27,35 +27,39 @@
 
 class Auth : public QObject
 {
-	Q_OBJECT
+    Q_OBJECT
     Q_PROPERTY(QString accessToken READ getAccessToken NOTIFY haveAccessToken)
     Q_PROPERTY(QString refreshToken READ getRefreshToken NOTIFY haveAccessToken)
-	enum opType { authOP, refreshOP };
+    enum opType { authOP, refreshOP };
 public:
-	explicit Auth(QObject* parent = 0);
-	virtual ~Auth();
+    explicit Auth(QObject* parent = 0);
+    virtual ~Auth();
 
-	QString getAccessToken() { return m_accessToken; }
-	QString getRefreshToken() { return m_refreshToken; }
+    QString getAccessToken() {
+        return m_accessToken;
+    }
+    QString getRefreshToken() {
+        return m_refreshToken;
+    }
 
 public slots:
-	void getAuth();
-	void authReceived(QString token);
+    void getAuth();
+    void authReceived(QString token);
 
 private:
-	void getNewAccessToken();
-	
-	QNetworkAccessManager* m_netMan;
-	QMap<QNetworkReply*, opType> m_operations;
-	QString m_accessToken;
-	QString m_refreshToken;
+    void getNewAccessToken();
+
+    QNetworkAccessManager* m_netMan;
+    QMap<QNetworkReply*, opType> m_operations;
+    QString m_accessToken;
+    QString m_refreshToken;
 
 private slots:
-	void replyFinshed(QNetworkReply* reply);
+    void replyFinshed(QNetworkReply* reply);
 
 signals:
-	void showWebView(QUrl authUrl);
-	void haveAccessToken();
+    void showWebView(QUrl authUrl);
+    void haveAccessToken();
 };
 
 #endif // UPREADER_H

@@ -24,7 +24,7 @@
 #include "article.h"
 
 FeedParser::FeedParser(QObject* parent)
-	: QObject(parent)
+    : QObject(parent)
 {
 
 }
@@ -81,89 +81,89 @@ there are then a list of categories which hold the items state(unread/read) and 
 
 ArticleList* FeedParser::parseFeed(QString atom)
 {
-	QDomDocument doc;
+    QDomDocument doc;
     ArticleList* map = new ArticleList();
     QList<Article*> entries;
     if(!doc.setContent(atom)) return new ArticleList();
 
-	QDomElement root = doc.documentElement();
+    QDomElement root = doc.documentElement();
     if(root.tagName() != "feed") return new ArticleList();
-	QDomNodeList l = root.childNodes();
-	for(int i = 0; i < l.length(); ++i) {
-		QDomNode n = l.at(i);
-		QDomElement e = n.toElement();
-		if(!e.isNull()) {
-			if(e.tagName() == "gr:continuation") { //the first element we're interested in is the gr:continuation element
+    QDomNodeList l = root.childNodes();
+    for(int i = 0; i < l.length(); ++i) {
+        QDomNode n = l.at(i);
+        QDomElement e = n.toElement();
+        if(!e.isNull()) {
+            if(e.tagName() == "gr:continuation") { //the first element we're interested in is the gr:continuation element
                 map->setContinuationToken(e.text());
-			} else if(e.tagName() == "entry") { //next is the entry element
+            } else if(e.tagName() == "entry") { //next is the entry element
                 Article* entry = parseEntry(e);
-				entries.append(entry);
-			}
-		}
-	}
+                entries.append(entry);
+            }
+        }
+    }
     map->setArticleList(entries);
-	return map;
+    return map;
 }
 
 Article* FeedParser::parseEntry(QDomElement entry)
 {
     Article* article = new Article();
-	QDomNodeList l = entry.childNodes();
-	for(int i = 0; i < l.length(); ++i) {
-		QDomNode n = l.at(i);
-		QDomElement e = n.toElement();
-		if(!e.isNull()) {
-			if(e.tagName() == "category") { //the category tag contains the read status
-				if(e.attribute("term").contains("/state/com.google/")) { //this will represent one of googles states(e.g. read)
+    QDomNodeList l = entry.childNodes();
+    for(int i = 0; i < l.length(); ++i) {
+        QDomNode n = l.at(i);
+        QDomElement e = n.toElement();
+        if(!e.isNull()) {
+            if(e.tagName() == "category") { //the category tag contains the read status
+                if(e.attribute("term").contains("/state/com.google/")) { //this will represent one of googles states(e.g. read)
                     QString state = e.attribute("term").split("/").last();
                     article->addState(state);
-				} else { //tag name?
+                } else { //tag name?
                     article->addState(e.attribute("term"));
-				}
-			} else if(e.tagName() == "title") {
+                }
+            } else if(e.tagName() == "title") {
 //				map.insert("titleType", e.attribute("type"));
                 article->setTitle(e.text());
-			} else if(e.tagName() == "published") {
-				QDateTime t = QDateTime::fromString("yyyy-MM-ddTHH:mm:ssZ"); //2011-05-18T21:05:53Z
+            } else if(e.tagName() == "published") {
+                QDateTime t = QDateTime::fromString("yyyy-MM-ddTHH:mm:ssZ"); //2011-05-18T21:05:53Z
                 article->setPublished(t);
-			} else if(e.tagName() == "updated") {
-				QDateTime t = QDateTime::fromString("yyyy-MM-ddTHH:mm:ssZ"); //2011-05-18T21:05:53Z
+            } else if(e.tagName() == "updated") {
+                QDateTime t = QDateTime::fromString("yyyy-MM-ddTHH:mm:ssZ"); //2011-05-18T21:05:53Z
                 article->setUpdated(t);
-			} else if(e.tagName() == "link") {
+            } else if(e.tagName() == "link") {
                 article->setLink(e.attribute("href"));
-			} else if((e.tagName() == "content") || (e.tagName() == "summary")) { //the fun part
+            } else if((e.tagName() == "content") || (e.tagName() == "summary")) { //the fun part
                 article->setArticleDomainName(e.attribute("xml:base"));
-				QString type = e.attribute("type");
+                QString type = e.attribute("type");
                 article->setContentType(type);
-				QString content = e.text();
-				if(type == "html" || type == "text") {
-					content = unescape(content);
-				}
+                QString content = e.text();
+                if(type == "html" || type == "text") {
+                    content = unescape(content);
+                }
                 article->setContent(content);
-			} else if(e.tagName() == "author") {
-				//lets find the name of the author - not interested in the other stuff that can be here as well
-				QString author;
-				QDomNodeList le = e.childNodes();
-				for(int j = 0; j < le.length(); ++j) {
-					QDomNode c = le.at(j);
-					QDomElement ce = c.toElement();
-					if(!ce.isNull()) {
-						if(ce.tagName() == "name") {
-							author = e.text();
-						}
-					}
-				}
+            } else if(e.tagName() == "author") {
+                //lets find the name of the author - not interested in the other stuff that can be here as well
+                QString author;
+                QDomNodeList le = e.childNodes();
+                for(int j = 0; j < le.length(); ++j) {
+                    QDomNode c = le.at(j);
+                    QDomElement ce = c.toElement();
+                    if(!ce.isNull()) {
+                        if(ce.tagName() == "name") {
+                            author = e.text();
+                        }
+                    }
+                }
                 article->setAuthor(author);
-			}
-		}
-	}
+            }
+        }
+    }
     return article;
 }
 
 QString FeedParser::unescape(QString s)
 {
-	return s;
-	//N.B!! Always replace the ampersand last
+    return s;
+    //N.B!! Always replace the ampersand last
 // 	return s.replace("&lt;", "<").replace("&gt;", ">").replace("&amp;", "&");
 }
 

@@ -21,9 +21,9 @@
 #include "filteredcontentmodel.h"
 
 FilteredContentModel::FilteredContentModel(QObject* parent)
-	: QSortFilterProxyModel(parent)
+    : QSortFilterProxyModel(parent)
 {
-	setSourceModel(new ContentModel(this));
+    setSourceModel(new ContentModel(this));
 }
 
 FilteredContentModel::~FilteredContentModel()
@@ -33,12 +33,12 @@ FilteredContentModel::~FilteredContentModel()
 
 bool FilteredContentModel::filterAcceptsRow(int source_row, const QModelIndex& source_parent) const
 {
-	return true;
+    return true;
 }
 
 void FilteredContentModel::setCurrentFeed(QString feed)
 {
-	m_currentFeed = feed;
+    m_currentFeed = feed;
 }
 
 #include "filteredcontentmodel.moc"

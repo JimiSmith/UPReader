@@ -22,11 +22,11 @@
 #include "subscription.h"
 
 FeedModel::FeedModel(QObject* parent)
-	: QAbstractListModel(parent)
+    : QAbstractListModel(parent)
 {
-	m_man = new Manager(this);
-	m_mapper = new QSignalMapper(this);
-	connect(m_man, SIGNAL(updatedSubList(QList<Subscription*>)), this, SLOT(setSubList(QList<Subscription*>)));
+    m_man = new Manager(this);
+    m_mapper = new QSignalMapper(this);
+    connect(m_man, SIGNAL(updatedSubList(QList<Subscription*>)), this, SLOT(setSubList(QList<Subscription*>)));
     connect(m_mapper, SIGNAL(mapped(int)), this, SLOT(subUpdated(int)));
 }
 
@@ -35,7 +35,8 @@ FeedModel::~FeedModel()
 
 }
 
-QHash<int, QByteArray> FeedModel::roleNames() const {
+QHash<int, QByteArray> FeedModel::roleNames() const
+{
     QHash<int, QByteArray> roles;
     roles[titleRole] = "title";
     roles[unreadRole] = "unread";
@@ -46,44 +47,44 @@ QHash<int, QByteArray> FeedModel::roleNames() const {
 
 QVariant FeedModel::data(const QModelIndex& index, int role) const
 {
-	if(!index.isValid()) return QVariant();
+    if(!index.isValid()) return QVariant();
 
-	switch(role) {
-		case titleRole: {
-			return m_subList.at(index.row())->getTitle();
-		}
-		case unreadRole: {
-			return m_subList.at(index.row())->getUnread();
-		}
-		case idRole: {
-			return m_subList.at(index.row())->getId();
-		}
-	}
-	return QVariant();
+    switch(role) {
+    case titleRole: {
+        return m_subList.at(index.row())->getTitle();
+    }
+    case unreadRole: {
+        return m_subList.at(index.row())->getUnread();
+    }
+    case idRole: {
+        return m_subList.at(index.row())->getId();
+    }
+    }
+    return QVariant();
 }
 
 int FeedModel::rowCount(const QModelIndex& parent) const
 {
-	return m_subList.length();
+    return m_subList.length();
 }
 
 void FeedModel::setSubList(QList< Subscription* > subList)
 {
-	beginResetModel();
-	m_subList = subList;
-	for(int i = 0; i < m_subList.size(); ++i) {
-		Subscription* s = m_subList.at(i);
-		m_mapper->removeMappings(s);
-		connect(s, SIGNAL(updated()), m_mapper, SLOT(map()));
-		m_mapper->setMapping(s, i);
-	}
-	emit subListUpdated();
-	endResetModel();
+    beginResetModel();
+    m_subList = subList;
+    for(int i = 0; i < m_subList.size(); ++i) {
+        Subscription* s = m_subList.at(i);
+        m_mapper->removeMappings(s);
+        connect(s, SIGNAL(updated()), m_mapper, SLOT(map()));
+        m_mapper->setMapping(s, i);
+    }
+    emit subListUpdated();
+    endResetModel();
 }
 
 void FeedModel::subUpdated(int row)
 {
-	dataChanged(createIndex(row, 0), createIndex(row, 0));
+    dataChanged(createIndex(row, 0), createIndex(row, 0));
 }
 
 #include "feedmodel.moc"

@@ -23,10 +23,10 @@
 #include "manager.h"
 
 Manager::Manager(QObject* parent)
-	: QObject(parent)
+    : QObject(parent)
 {
-	m_netMan = new QNetworkAccessManager(this);
-	connect(m_netMan, SIGNAL(finished(QNetworkReply*)), this, SLOT(replyFinshed(QNetworkReply*)));
+    m_netMan = new QNetworkAccessManager(this);
+    connect(m_netMan, SIGNAL(finished(QNetworkReply*)), this, SLOT(replyFinshed(QNetworkReply*)));
 }
 
 Manager::~Manager()
@@ -36,45 +36,45 @@ Manager::~Manager()
 
 void Manager::setAccessToken(QString access)
 {
-	m_accessToken = access;
+    m_accessToken = access;
 }
 
 void Manager::setRefreshToken(QString refresh)
 {
-	m_refreshToken = refresh;
+    m_refreshToken = refresh;
 }
 
 void Manager::refreshSubList()
 {
 // 	qDebug() << "refreshing" << m_accessToken;
     QNetworkRequest r(QUrl("https://www.google.com/reader/api/0/subscription/list?output=json"));
-	r.setRawHeader("Authorization", QString("OAuth %0").arg(m_accessToken).toUtf8());
-	m_operations.insert(m_netMan->get(r), listOP);
+    r.setRawHeader("Authorization", QString("OAuth %0").arg(m_accessToken).toUtf8());
+    m_operations.insert(m_netMan->get(r), listOP);
 }
 
 void Manager::replyFinshed(QNetworkReply* reply)
 {
-	QByteArray json = reply->readAll();
+    QByteArray json = reply->readAll();
 //    qDebug() << json;
     QJsonDocument sd = QJsonDocument::fromJson(json);
     QVariant result = sd.toVariant();
-	switch(m_operations.value(reply)) {
-		case listOP: {
-			QVariantList t = result.toMap().value("subscriptions").toList();
-			foreach(QVariant v, t) {
-				QVariantMap m = v.toMap();
-				Subscription* s = new Subscription(m_accessToken, this);
-				s->setId(m.value("id").toString());
-				s->setTitle(m.value("title").toString());
-				s->setSortId(m.value("sortid").toString());
-				s->setOldestItemTime(m.value("firstitemmsec").toInt());
-				s->setUrl(m.value("htmlUrl").toString());
-				s->setCategories(m.value("categories").toStringList());
-				m_subList.append(s);
-			}
-			emit updatedSubList(m_subList);
-		}
-	}
+    switch(m_operations.value(reply)) {
+    case listOP: {
+        QVariantList t = result.toMap().value("subscriptions").toList();
+        foreach(QVariant v, t) {
+            QVariantMap m = v.toMap();
+            Subscription* s = new Subscription(m_accessToken, this);
+            s->setId(m.value("id").toString());
+            s->setTitle(m.value("title").toString());
+            s->setSortId(m.value("sortid").toString());
+            s->setOldestItemTime(m.value("firstitemmsec").toInt());
+            s->setUrl(m.value("htmlUrl").toString());
+            s->setCategories(m.value("categories").toStringList());
+            m_subList.append(s);
+        }
+        emit updatedSubList(m_subList);
+    }
+    }
 }
 
 #include "manager.moc"

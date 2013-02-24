@@ -22,7 +22,7 @@
 #include "articlelist.h"
 
 ArticleList::ArticleList(QObject* parent)
-: QObject(parent)
+    : QObject(parent)
 {
 }
 

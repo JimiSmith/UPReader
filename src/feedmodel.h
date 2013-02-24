@@ -30,43 +30,52 @@ class Subscription;
 
 class FeedModel : public QAbstractListModel
 {
-	Q_OBJECT
-	Q_PROPERTY(QString accessToken READ getAccessToken WRITE setAccessToken)
-	Q_PROPERTY(QString refreshToken READ getRefreshToken WRITE setRefreshToken)
-	enum roles { titleRole = Qt::UserRole + 1, unreadRole, idRole };
+    Q_OBJECT
+    Q_PROPERTY(QString accessToken READ getAccessToken WRITE setAccessToken)
+    Q_PROPERTY(QString refreshToken READ getRefreshToken WRITE setRefreshToken)
+    enum roles { titleRole = Qt::UserRole + 1, unreadRole, idRole };
 public:
-	FeedModel(QObject* parent = 0);
-	virtual ~FeedModel();
-	
-	void setAccessToken(QString token) {
-		m_accessToken = token;
-		if(!m_accessToken.isEmpty()) {
-			m_man->setAccessToken(m_accessToken);
-			m_man->refreshSubList();
-		}
-	}
-	QString getAccessToken() { return m_accessToken; }
-	void setRefreshToken(QString token) { m_refreshToken = token; m_man->setRefreshToken(m_refreshToken);}
-	QString getRefreshToken() { return m_refreshToken; }
-	Q_INVOKABLE Subscription* getSubscription(int ind) { return m_subList.at(ind); }
+    FeedModel(QObject* parent = 0);
+    virtual ~FeedModel();
+
+    void setAccessToken(QString token) {
+        m_accessToken = token;
+        if(!m_accessToken.isEmpty()) {
+            m_man->setAccessToken(m_accessToken);
+            m_man->refreshSubList();
+        }
+    }
+    QString getAccessToken() {
+        return m_accessToken;
+    }
+    void setRefreshToken(QString token) {
+        m_refreshToken = token;
+        m_man->setRefreshToken(m_refreshToken);
+    }
+    QString getRefreshToken() {
+        return m_refreshToken;
+    }
+    Q_INVOKABLE Subscription* getSubscription(int ind) {
+        return m_subList.at(ind);
+    }
 
     virtual QHash<int, QByteArray> roleNames() const;
-	virtual QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const;
-	virtual int rowCount(const QModelIndex& parent = QModelIndex()) const;
+    virtual QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const;
+    virtual int rowCount(const QModelIndex& parent = QModelIndex()) const;
 
 private:
-	QString m_accessToken;
-	QString m_refreshToken;
-	QList<Subscription*> m_subList;
-	Manager* m_man;
-	QSignalMapper* m_mapper;
+    QString m_accessToken;
+    QString m_refreshToken;
+    QList<Subscription*> m_subList;
+    Manager* m_man;
+    QSignalMapper* m_mapper;
 
 private slots:
-	void setSubList(QList<Subscription*> subList);
-	void subUpdated(int row);
+    void setSubList(QList<Subscription*> subList);
+    void subUpdated(int row);
 
 signals:
-	void subListUpdated();
+    void subListUpdated();
 };
 
 #endif // FEEDMODEL_H

@@ -33,70 +33,76 @@ class ArticleList;
 
 class Subscription : public QObject
 {
-	Q_OBJECT
+    Q_OBJECT
     Q_PROPERTY(QString title READ getTitle NOTIFY updated)
-	enum opType { refreshOP, getMoreOP };
-	struct StoryContent {
-		QString title;
-		QString author;
-		QString content;
-		bool read;
-	};
+    enum opType { refreshOP, getMoreOP };
+    struct StoryContent {
+        QString title;
+        QString author;
+        QString content;
+        bool read;
+    };
 public:
     Subscription();
-	explicit Subscription(QString token, QObject* parent = 0);
-	virtual ~Subscription();
-	
-	void setId(QString id);
-	QString getId();
-	
-	void setTitle(QString title);
-	QString getTitle();
-	
-	void setCategories(QStringList cat);
-	QStringList getCategories();
-	
-	void setSortId(QString sortid);
-	QString getSortId();
-	
-	void setOldestItemTime(int time);
-	int getOldestItemTime();
-	
-	void setUrl(QString url);
-	QString getUrl();
+    explicit Subscription(QString token, QObject* parent = 0);
+    virtual ~Subscription();
 
-	int getUnread() { return m_unread; }
+    void setId(QString id);
+    QString getId();
 
-    ArticleList* getFeedData() { return m_feedData; }
+    void setTitle(QString title);
+    QString getTitle();
 
-	bool canFetchMore() { return !m_continuation.isEmpty(); }
+    void setCategories(QStringList cat);
+    QStringList getCategories();
+
+    void setSortId(QString sortid);
+    QString getSortId();
+
+    void setOldestItemTime(int time);
+    int getOldestItemTime();
+
+    void setUrl(QString url);
+    QString getUrl();
+
+    int getUnread() {
+        return m_unread;
+    }
+
+    ArticleList* getFeedData() {
+        return m_feedData;
+    }
+
+    bool canFetchMore() {
+        return !m_continuation.isEmpty();
+    }
 
 private:
-	QString m_accessToken;
-	QString m_id;
-	QString m_title;
-	QStringList m_categories;
-	QString m_sortid;
-	int m_oldestItemTime;
-	QString m_url;
-	QString m_continuation;
-	QString m_atomText;
-	QNetworkAccessManager* m_netMan;
-	QMap<QNetworkReply*, opType> m_operations;
-	FeedParser* m_parser;
+    QString m_accessToken;
+    QString m_id;
+    QString m_title;
+    QStringList m_categories;
+    QString m_sortid;
+    int m_oldestItemTime;
+    QString m_url;
+    QString m_continuation;
+    QString m_atomText;
+    QNetworkAccessManager* m_netMan;
+    QMap<QNetworkReply*, opType> m_operations;
+    FeedParser* m_parser;
     ArticleList* m_feedData;
-	int m_unread;
+    int m_unread;
 
 public slots:
-	void fetchMore();
-	
+    void fetchMore();
+
 private slots:
-	void replyFinshed(QNetworkReply* reply);
-	void refresh();
+    void replyFinshed(QNetworkReply* reply);
+    void refresh();
 
 signals:
-	void updated();
-	void itemsAppended(int);
+    void updated();
+    void itemsAppended(int);
 };
 Q_DECLARE_METATYPE(QList<Subscription*>)
 Q_DECLARE_METATYPE(Subscription*)

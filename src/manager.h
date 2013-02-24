@@ -30,29 +30,29 @@
 
 class Manager : public QObject
 {
-	Q_OBJECT
-	enum opType { listOP };
+    Q_OBJECT
+    enum opType { listOP };
 public:
-	explicit Manager(QObject* parent = 0);
-	virtual ~Manager();
+    explicit Manager(QObject* parent = 0);
+    virtual ~Manager();
 
-	void setRefreshToken(QString refresh);
-	void setAccessToken(QString access);
+    void setRefreshToken(QString refresh);
+    void setAccessToken(QString access);
 
-	void refreshSubList();
-	
+    void refreshSubList();
+
 private:
-	QNetworkAccessManager* m_netMan;
-	QMap<QNetworkReply*, opType> m_operations;
-	QString m_accessToken;
-	QString m_refreshToken;
-	QList<Subscription*> m_subList;
-	
+    QNetworkAccessManager* m_netMan;
+    QMap<QNetworkReply*, opType> m_operations;
+    QString m_accessToken;
+    QString m_refreshToken;
+    QList<Subscription*> m_subList;
+
 private slots:
-	void replyFinshed(QNetworkReply* reply);
+    void replyFinshed(QNetworkReply* reply);
 
 signals:
-	void updatedSubList(QList<Subscription*>);
+    void updatedSubList(QList<Subscription*>);
 };
 
 #endif // MANAGER_H
