@@ -40,7 +40,8 @@ int main(int argc, char *argv[])
     qmlRegisterType<Article>("UPReader", 0, 1, "Article");
     qRegisterMetaType<QList<Subscription*> >("QList<Subscription*>");
     qRegisterMetaType<Subscription* >("Subscription*");
-    viewer->setSource(QUrl("../src/qml/main.qml"));
+    viewer->engine()->addImportPath("qrc:/qml/");
+    viewer->setSource(QUrl("qrc:/qml/main.qml"));
     viewer->show();
 
     return app.exec();

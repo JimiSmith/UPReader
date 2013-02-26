@@ -1,0 +1,11 @@
+<RCC>
+    <qresource prefix="/qml">
+        <file alias="ArticleListView.qml">src/qml/ArticleListView.qml</file>
+        <file alias="ArticleView.qml">src/qml/ArticleView.qml</file>
+        <file alias="main.qml">src/qml/main.qml</file>
+        <file alias="ReaderView.qml">src/qml/ReaderView.qml</file>
+        <file alias="StoryDelegate.qml">src/qml/StoryDelegate.qml</file>
+        <file alias="SubList.qml">src/qml/SubList.qml</file>
+        <file alias="WebAuth.qml">src/qml/WebAuth.qml</file>
+    </qresource>
+</RCC>

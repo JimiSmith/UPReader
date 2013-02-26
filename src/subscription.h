@@ -43,7 +43,7 @@ class Subscription : public QObject
         bool read;
     };
 public:
-    Subscription(QObject* parent = 0);
+    Subscription();
     explicit Subscription(QString token, QObject* parent = 0);
     virtual ~Subscription();
 

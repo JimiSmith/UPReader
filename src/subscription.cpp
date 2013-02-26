@@ -23,9 +23,9 @@
 #include "article.h"
 #include "articlelist.h"
 
-Subscription::Subscription(QObject* parent = 0)
+Subscription::Subscription()
 {
-    Subscription("", parent);
+    Subscription("");
 }
 
 Subscription::Subscription(QString token, QObject* parent)

@@ -30,16 +30,26 @@ set(upreader_src src/filteredcontentmodel.cpp
                  src/upreader.cpp
                  src/main.cpp)
 
+set(upreader_qml src/qml/main.qml
+                 src/qml/ArticleListView.qml
+                 src/qml/ArticleView.qml
+                 src/qml/ReaderView.qml
+                 src/qml/StoryDelegate.qml
+                 src/qml/SubList.qml
+                 src/qml/WebAuth.qml)
+
 add_custom_target(QmlFiles ALL ${CMAKE_COMMAND}
-                  SOURCES src/qml/main.qml
-                          src/qml/ArticleListView.qml
-                          src/qml/ArticleView.qml
-                          src/qml/ReaderView.qml
-                          src/qml/StoryDelegate.qml
-                          src/qml/SubList.qml
-                          src/qml/WebAuth.qml)
+                  SOURCES ${upreader_qml})
+
+qt5_add_resources(upreader_resources qml.qrc)
 
 # Now make sure all files get to the right place
-add_executable(UPReader ${upreader_src})
+add_executable(UPReader ${upreader_src} ${upreader_resources})
 
 qt5_use_modules(UPReader Quick Qml Gui Core Xml)
+
+INSTALL(TARGETS UPReader
+    RUNTIME DESTINATION bin)
+
+install(PROGRAMS up-reader.desktop
+    DESTINATION ${CMAKE_INSTALL_PREFIX}/share/applications)
