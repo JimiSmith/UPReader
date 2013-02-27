@@ -48,10 +48,22 @@ Page {
         model: ContentModel {
             id: contentModel
         }
-        delegate: ListItem.Standard {
+        delegate: ListItem.Subtitled {
             text: title
+            subText: summary
+//            icon: Qt.resolvedUrl("qrc:/images/indicator-read.png")
             onClicked: {
                 pageStack.push(Qt.resolvedUrl('ArticleView.qml'), {article: contentModel.getArticle(index)})
+            }
+            UbuntuShape {
+                color: unread ? '#AEA79F' : '#DD4814'
+                width: units.gu(1)
+                height: units.gu(1)
+                anchors {
+                    left: parent.left
+                    leftMargin: units.gu(-1.5)
+                    topMargin: units.gu(0)
+                }
             }
         }
 

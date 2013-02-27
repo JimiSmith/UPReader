@@ -28,7 +28,7 @@
 class ContentModel : public QAbstractListModel
 {
     Q_OBJECT
-    enum roles { titleRole = Qt::UserRole + 1, contentRole, authorRole, readRole };
+    enum roles { titleRole = Qt::UserRole + 1, contentRole, authorRole, readRole, summaryRole };
 
 public:
     explicit ContentModel(QObject* parent = 0);

@@ -39,7 +39,8 @@ QHash<int, QByteArray> ContentModel::roleNames() const
     roles[titleRole] = "title";
     roles[contentRole] = "content";
     roles[authorRole] = "author";
-    roles[readRole] = "read";
+    roles[readRole] = "unread";
+    roles[summaryRole] = "summary";
     return roles;
 }
 
@@ -59,7 +60,10 @@ QVariant ContentModel::data(const QModelIndex& index, int role) const
         return entry->author();
     }
     case readRole: {
-        return true;
+        return entry->unread();
+    }
+    case summaryRole: {
+        return entry->summary();
     }
     }
 }

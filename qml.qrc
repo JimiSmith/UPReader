@@ -8,4 +8,8 @@
         <file alias="SubList.qml">src/qml/SubList.qml</file>
         <file alias="WebAuth.qml">src/qml/WebAuth.qml</file>
     </qresource>
+    <qresource prefix="/images">
+        <file alias="indicator-read.png">images/indicator-read.png</file>
+        <file alias="indicator-unread.png">images/indicator-unread.png</file>
+    </qresource>
 </RCC>

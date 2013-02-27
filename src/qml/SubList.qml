@@ -37,16 +37,19 @@ Page {
             refreshToken: authObject.refreshToken
         }
 
-        delegate: ListItem.Standard {
+        delegate: ListItem.Subtitled {
             text: title
             progression: unread == -1 ? 0 : 1
+            enabled: progression
+            subText: progression ? unread + " unread item" + (unread == 1 ? "" : "s") : "loading..."
+            highlightWhenPressed: true
             onClicked: {
                 itemClicked(feedModel.getSubscription(index));
             }
             ActivityIndicator {
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.right: parent.right
-                anchors.rightMargin: units.gu(2)
+//                anchors.rightMargin: units.gu(2)
                 running: unread == -1 ? 1 : 0
             }
         }

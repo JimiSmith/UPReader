@@ -29,7 +29,9 @@ class Article : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(QString content READ content NOTIFY updated)
+    Q_PROPERTY(QString summary READ summary NOTIFY updated)
     Q_PROPERTY(QString title READ title NOTIFY updated)
+    Q_PROPERTY(bool unread READ unread NOTIFY updated)
     Q_PROPERTY(QString articleDomainName READ articleDomainName NOTIFY updated)
 public:
     explicit Article(QObject* parent = 0);
@@ -66,6 +68,10 @@ public:
 
     QString contentType() const;
     void setContentType(const QString &contentType);
+
+    QString summary() const;
+
+    bool unread() const;
 
 private:
     QStringList m_state;

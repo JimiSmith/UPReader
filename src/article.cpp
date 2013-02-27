@@ -140,3 +140,13 @@ void Article::setContentType(const QString &contentType)
 {
     m_contentType = contentType;
 }
+
+QString Article::summary() const
+{
+    return "A summary";
+}
+
+bool Article::unread() const
+{
+    return m_state.contains("read");
+}
