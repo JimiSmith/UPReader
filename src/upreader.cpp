@@ -47,7 +47,6 @@ void Auth::getAuth()
     settings.endGroup();
     if(m_refreshToken.isEmpty()) {
         QUrl u = QUrl("https://accounts.google.com/o/oauth2/auth?client_id=444103914762.apps.googleusercontent.com&redirect_uri=urn:ietf:wg:oauth:2.0:oob&scope=https://www.google.com/reader/api/ https://www.google.com/reader/atom/&response_type=code");
-        qDebug() << u;
         emit showWebView(u);
     } else {
         getNewAccessToken();
@@ -83,7 +82,6 @@ void Auth::getNewAccessToken()
 void Auth::replyFinshed(QNetworkReply* reply)
 {
     QByteArray json = reply->readAll();
-    qDebug() << json;
     QJsonDocument sd = QJsonDocument::fromJson(json);
     QVariant result = sd.toVariant();
     switch(m_operations.value(reply)) {

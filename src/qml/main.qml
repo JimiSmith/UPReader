@@ -61,7 +61,6 @@ MainView {
             showWebAuth(authUrl);
         }
         onHaveAccessToken: {
-            console.log("Have access token " + authObject.accessToken);
             showSubList();
         }
     }

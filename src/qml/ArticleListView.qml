@@ -51,7 +51,7 @@ Page {
         delegate: ListItem.Subtitled {
             text: title
             subText: summary
-//            icon: Qt.resolvedUrl("qrc:/images/indicator-read.png")
+            progression: true
             onClicked: {
                 pageStack.push(Qt.resolvedUrl('ArticleView.qml'), {article: contentModel.getArticle(index)})
             }
