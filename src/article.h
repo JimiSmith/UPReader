@@ -82,6 +82,7 @@ private:
     QString m_articleDomainName;
     QString m_contentType;
     QString m_content;
+    QString m_summary;
     QDateTime m_published;
     QDateTime m_updated;
 

@@ -18,6 +18,8 @@
 */
 
 #include <QtCore/QDebug>
+#include <QTextDocument>
+#include <QtGlobal>
 
 #include "article.h"
 
@@ -89,6 +91,17 @@ QString Article::content() const
 void Article::setContent(const QString &content)
 {
     m_content = content;
+    QTextDocument doc;
+    doc.setHtml(m_content);
+
+    m_summary = doc.toPlainText();
+    m_summary.replace("\n", "").replace("\t", " ").replace("\r", "");
+    int truncatePos = qMin(80, m_summary.length() - 1);
+    while (truncatePos < m_summary.length() - 1 && m_summary.at(truncatePos) != ' ') {
+        truncatePos++;
+    }
+    m_summary.truncate(truncatePos);
+    m_summary.append("...");
 }
 
 QString Article::link() const
@@ -143,7 +156,7 @@ void Article::setContentType(const QString &contentType)
 
 QString Article::summary() const
 {
-    return "A summary";
+    return m_summary;
 }
 
 bool Article::unread() const
