@@ -23,10 +23,12 @@ import UPReader 0.1
 import Ubuntu.Components 0.1
 
 MainView {
-    id: rootItem
+    id: applicationView
     applicationName: "UP Reader"
     width: units.gu(40)
     height: units.gu(75)
+
+    property string qtwebkitdpr: "1.0"
 
     function showLoading() {
         loadingIndicator.running = true
@@ -44,7 +46,7 @@ MainView {
     function showWebAuth(authUrl) {
         showLoading();
         var authComponent = Qt.createComponent("WebAuth.qml");
-        var authView = authComponent.createObject(rootItem, {url: authUrl});
+        var authView = authComponent.createObject(applicationView, {url: authUrl});
         authView.authCompleted.connect(authCompleted);
     }
 

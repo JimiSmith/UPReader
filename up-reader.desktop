@@ -1,12 +1,11 @@
 [Desktop Entry]
-Encoding=UTF-8
 Version=1.0
-Type=Application
-Terminal=false
 Name=UPReader
+GenericName=Google Reader Client
+Comment=View your Google Reader feeds
+Type=Application
+Icon=ubuntu-browser
 Exec=UPReader
-Icon=ubuntu-qmlrunn
-X-Window-Icon=ubuntu-qmlrunner
-X-HildonDesk-ShowInToolbar=true
-X-Osso-Type=application/x-executable
-Name[en_ZA]=up-reader
+Terminal=false
+Categories=Network;WebBrowser;
+Keywords=Internet;RSS;Feeds;Web;Explorer

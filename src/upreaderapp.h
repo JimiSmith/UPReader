@@ -17,12 +17,24 @@
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
-#include "upreaderapp.h"
+#ifndef UPREADERAPP_H
+#define UPREADERAPP_H
 
-int main(int argc, char *argv[])
+#include <QApplication>
+
+class QQuickView;
+
+class UPReaderApp : public QApplication
 {
-    UPReaderApp app(argc, argv);
-    app.initialize();
+    Q_OBJECT
+public:
+    explicit UPReaderApp(int& argc, char** argv);
+    void initialize();
+    int exec();
 
-    return app.exec();
-}
+private:
+    QQuickView *m_view;
+
+};
+
+#endif // UPREADERAPP_H

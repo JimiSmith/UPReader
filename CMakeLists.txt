@@ -2,9 +2,9 @@ project(UPReader)
 
 cmake_minimum_required(VERSION 2.8.8)
 
-find_package(Qt5Quick REQUIRED)
 find_package(Qt5Core REQUIRED)
-find_package(Qt5Gui REQUIRED)
+find_package(Qt5Widgets REQUIRED)
+find_package(Qt5Quick REQUIRED)
 find_package(Qt5Xml REQUIRED)
 
 set(CMAKE_AUTOMOC ON)
@@ -28,6 +28,7 @@ set(upreader_src src/filteredcontentmodel.cpp
                  src/subscription.cpp
                  src/manager.cpp
                  src/upreader.cpp
+                 src/upreaderapp.cpp
                  src/main.cpp)
 
 set(upreader_qml src/qml/main.qml
@@ -46,7 +47,7 @@ qt5_add_resources(upreader_resources qml.qrc)
 # Now make sure all files get to the right place
 add_executable(UPReader ${upreader_src} ${upreader_resources})
 
-qt5_use_modules(UPReader Quick Qml Gui Core Xml)
+qt5_use_modules(UPReader Quick Qml Widgets Core Xml)
 
 INSTALL(TARGETS UPReader
     RUNTIME DESTINATION bin)
