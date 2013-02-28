@@ -60,7 +60,7 @@ Page {
                         itemTitle: title
                         unreadCount: unread
                         onClicked: {
-                            itemClicked(allFeedModel.getSubscription(id));
+                            itemClicked(feedModel.getSubscription(id));
                         }
                     }
                 }
@@ -85,7 +85,7 @@ Page {
                         itemTitle: title
                         unreadCount: unread
                         onClicked: {
-                            itemClicked(unreadFeedModel.getSubscription(id));
+                            itemClicked(feedModel.getSubscription(id));
                         }
                     }
                 }
