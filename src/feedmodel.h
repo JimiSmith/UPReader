@@ -59,6 +59,8 @@ public:
         return m_subList.at(ind);
     }
 
+    Q_INVOKABLE void refresh();
+
     virtual QHash<int, QByteArray> roleNames() const;
     virtual QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const;
     virtual int rowCount(const QModelIndex& parent = QModelIndex()) const;

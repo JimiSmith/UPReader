@@ -22,19 +22,34 @@ import Ubuntu.Components 0.1
 import UPReader 0.1
 
 PageStack {
-    id: rootItem
+    id: pageStack
     anchors.fill: parent
+    __showHeader: false
+    visible: false
+    signal refresh()
 
-    Component.onCompleted: rootItem.push(page0)
+    Component.onCompleted: pageStack.push(page0)
 
     Page {
         id: page0
-        title: "Subscriptions"
         anchors.fill: parent
+
+        tools: ToolbarActions {
+            Action {
+                objectName: "action"
+                text: i18n.tr("Refresh")
+                iconSource: Qt.resolvedUrl("qrc:/images/refresh.png")
+
+                onTriggered: {
+                    refresh();
+                }
+            }
+        }
+
         SubList {
             anchors.fill: parent
             onItemClicked: {
-                rootItem.push(Qt.resolvedUrl('ArticleListView.qml'), {subscription: subscription});
+                pageStack.push(Qt.resolvedUrl('ArticleListView.qml'), {subscription: subscription});
             }
         }
     }

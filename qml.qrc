@@ -11,5 +11,6 @@
     <qresource prefix="/images">
         <file alias="indicator-read.png">images/indicator-read.png</file>
         <file alias="indicator-unread.png">images/indicator-unread.png</file>
+        <file alias="refresh.png">images/refresh.png</file>
     </qresource>
 </RCC>

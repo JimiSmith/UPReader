@@ -28,15 +28,12 @@ Page {
     tools: ToolbarActions {
         Action {
             objectName: "action"
-            text: i18n.tr("Open in browser")
+            text: i18n.tr("Dummy")
 
             onTriggered: {
+                contentModel.refresh();
             }
         }
-    }
-
-    Component.onCompleted: {
-        contentModel.subscription = subscription;
     }
 
     title: subscription.title
@@ -45,9 +42,14 @@ Page {
         id: content
         anchors.fill: parent
 
+        Component.onCompleted: {
+            contentModel.subscription = subscription;
+        }
+
         model: ContentModel {
             id: contentModel
         }
+
         delegate: ListItem.Subtitled {
             text: title
             subText: summary

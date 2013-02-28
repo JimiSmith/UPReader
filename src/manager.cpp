@@ -46,6 +46,11 @@ void Manager::setRefreshToken(QString refresh)
 
 void Manager::refreshSubList()
 {
+    // cancel all running operations
+    foreach (QNetworkReply* reply, m_operations.keys()) {
+        reply->abort();
+    }
+    m_subList = QList< Subscription* >();
 // 	qDebug() << "refreshing" << m_accessToken;
     QNetworkRequest r(QUrl("https://www.google.com/reader/api/0/subscription/list?output=json"));
     r.setRawHeader("Authorization", QString("OAuth %0").arg(m_accessToken).toUtf8());

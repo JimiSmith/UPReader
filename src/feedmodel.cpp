@@ -35,6 +35,15 @@ FeedModel::~FeedModel()
 
 }
 
+void FeedModel::refresh()
+{
+    beginResetModel();
+    m_subList = QList< Subscription* >();
+    endResetModel();
+    emit subListUpdated();
+    m_man->refreshSubList();
+}
+
 QHash<int, QByteArray> FeedModel::roleNames() const
 {
     QHash<int, QByteArray> roles;
