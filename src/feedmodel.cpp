@@ -35,6 +35,18 @@ FeedModel::~FeedModel()
 
 }
 
+Subscription *FeedModel::getSubscription(QString id)
+{
+    foreach (Subscription* sub, m_subList) {
+        if (sub->getId() == id) {
+            return sub;
+        }
+    }
+
+    return NULL;
+
+}
+
 void FeedModel::refresh()
 {
     beginResetModel();

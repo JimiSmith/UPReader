@@ -33,8 +33,9 @@ class FeedModel : public QAbstractListModel
     Q_OBJECT
     Q_PROPERTY(QString accessToken READ getAccessToken WRITE setAccessToken)
     Q_PROPERTY(QString refreshToken READ getRefreshToken WRITE setRefreshToken)
-    enum roles { titleRole = Qt::UserRole + 1, unreadRole, idRole };
 public:
+    enum roles { titleRole = Qt::UserRole + 1, unreadRole, idRole };
+
     FeedModel(QObject* parent = 0);
     virtual ~FeedModel();
 
@@ -55,9 +56,7 @@ public:
     QString getRefreshToken() {
         return m_refreshToken;
     }
-    Q_INVOKABLE Subscription* getSubscription(int ind) {
-        return m_subList.at(ind);
-    }
+    Q_INVOKABLE Subscription* getSubscription(QString id);
 
     Q_INVOKABLE void refresh();
 

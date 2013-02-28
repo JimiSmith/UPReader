@@ -24,45 +24,68 @@ import Ubuntu.Components.ListItems 0.1 as ListItem
 
 Page {
     signal itemClicked(var subscription)
+
+    FeedModel {
+        id: feedModel
+        accessToken: authObject.accessToken
+        refreshToken: authObject.refreshToken
+    }
+
+    Connections {
+        target: readerView
+        onRefresh: {
+            feedModel.refresh();
+        }
+    }
+
     Tabs {
         id: tabs
         anchors.fill: parent
 
         Tab {
-            objectName: "Tab1"
+            objectName: "AllTab"
+            title: i18n.tr("All")
+            page: Page {
+
+                ListView {
+                    id: allFeedList
+                    anchors.fill: parent
+                    model: FilteredFeedModel {
+                        id: allFeedModel
+                        filter: "all"
+                        sourceModel: feedModel
+                    }
+
+                    delegate: SubItem {
+                        itemTitle: title
+                        unreadCount: unread
+                        onClicked: {
+                            itemClicked(allFeedModel.getSubscription(id));
+                        }
+                    }
+                }
+            }
+        }
+
+        Tab {
+            objectName: "UnreadTab"
             title: i18n.tr("Unread")
             page: Page {
 
-                Connections {
-                    target: readerView
-                    onRefresh: {
-                        feedModel.refresh();
-                    }
-                }
-
                 ListView {
-                    id: feedList
+                    id: unreadFeedList
                     anchors.fill: parent
-                    model: FeedModel {
-                        id: feedModel
-                        accessToken: authObject.accessToken
-                        refreshToken: authObject.refreshToken
+                    model: FilteredFeedModel {
+                        id: unreadFeedModel
+                        filter: "unread"
+                        sourceModel: feedModel
                     }
 
-                    delegate: ListItem.Subtitled {
-                        text: title
-                        progression: unread == -1 ? 0 : 1
-                        enabled: progression
-                        subText: progression ? unread + " unread item" + (unread == 1 ? "" : "s") : "loading..."
-                        highlightWhenPressed: true
+                    delegate: SubItem {
+                        itemTitle: title
+                        unreadCount: unread
                         onClicked: {
-                            itemClicked(feedModel.getSubscription(index));
-                        }
-                        ActivityIndicator {
-                            anchors.verticalCenter: parent.verticalCenter
-                            anchors.right: parent.right
-            //                anchors.rightMargin: units.gu(2)
-                            running: unread == -1 ? 1 : 0
+                            itemClicked(unreadFeedModel.getSubscription(id));
                         }
                     }
                 }

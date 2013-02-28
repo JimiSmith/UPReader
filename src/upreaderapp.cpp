@@ -22,6 +22,7 @@
 
 #include "upreader.h"
 #include "feedmodel.h"
+#include "filteredfeedmodel.h"
 #include "filteredcontentmodel.h"
 #include "article.h"
 #include "upreaderapp.h"
@@ -68,11 +69,13 @@ void UPReaderApp::initialize()
     QObject::connect(m_view->engine(), SIGNAL(quit()), m_view, SLOT(close()));
     qmlRegisterType<Auth>("UPReader", 0, 1, "Auth");
     qmlRegisterType<FeedModel>("UPReader", 0, 1, "FeedModel");
+    qmlRegisterType<FilteredFeedModel>("UPReader", 0, 1, "FilteredFeedModel");
     qmlRegisterType<FilteredContentModel>("UPReader", 0, 1, "ContentModel");
     qmlRegisterType<Subscription>("UPReader", 0, 1, "Subscription");
     qmlRegisterType<Article>("UPReader", 0, 1, "Article");
     qRegisterMetaType<QList<Subscription*> >("QList<Subscription*>");
     qRegisterMetaType<Subscription* >("Subscription*");
+    qRegisterMetaType<QAbstractItemModel* >("QAbstractItemModel*");
     m_view->engine()->addImportPath("qrc:/qml/");
     m_view->setSource(QUrl("qrc:/qml/main.qml"));
 }
