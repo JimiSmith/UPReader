@@ -99,6 +99,7 @@ public slots:
 private slots:
     void replyFinshed(QNetworkReply* reply);
     void refresh();
+    void parsingComplete(ArticleList* feedList);
 
 signals:
     void updated();

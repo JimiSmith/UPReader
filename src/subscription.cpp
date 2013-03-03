@@ -18,6 +18,7 @@
 */
 #include <QtCore/QDebug>
 #include <QtCore/qdatetime.h>
+#include <QThread>
 
 #include "subscription.h"
 #include "article.h"
@@ -33,14 +34,15 @@ Subscription::Subscription(QString token, QObject* parent)
 {
     m_accessToken = token;
     m_netMan = new QNetworkAccessManager(this);
-    m_parser = new FeedParser(this);
+    m_parser = new FeedParser();
+    connect(m_parser, SIGNAL(doneParsing(ArticleList*)), this, SLOT(parsingComplete(ArticleList*)));
     m_unread = -1;
     connect(m_netMan, SIGNAL(finished(QNetworkReply*)), this, SLOT(replyFinshed(QNetworkReply*)));
 }
 
 Subscription::~Subscription()
 {
-
+    delete m_parser;
 }
 
 void Subscription::setId(QString id)
@@ -144,33 +146,49 @@ void Subscription::replyFinshed(QNetworkReply* reply)
     } else { //we're at the endpoint
         switch(m_operations.value(reply)) {
         case refreshOP: {
-            m_atomText = QString::fromUtf8(reply->readAll());
-            m_feedData = m_parser->parseFeed(m_atomText);
-            m_continuation = m_feedData->continuationToken();
-            m_unread = 0;
-            foreach(Article* v, m_feedData->articleList()) {
-                if(!v->state().contains("read")) {
-                    m_unread++;
-                }
-            }
-            emit updated();
+            m_feedData = new ArticleList(this);
             break;
         }
         case getMoreOP: {
-            QString r = QString::fromUtf8(reply->readAll());
-            int i = m_feedData->articleList().size();
-            ArticleList* feedData = m_parser->parseFeed(r);
-            m_feedData->continuationToken() = feedData->continuationToken();
-            QList<Article*> l = m_feedData->articleList();
-            l.append(feedData->articleList());
-            m_feedData->articleList() = l;
-            m_continuation = m_feedData->continuationToken();
-            emit itemsAppended(i);
             break;
         }
         }
+        m_atomText = QString::fromUtf8(reply->readAll());
+        m_parser->setFeedString(m_atomText);
+        QThread *workerThread = new QThread(this);
+
+        connect(workerThread, &QThread::started, m_parser, &FeedParser::beginParsing);
+        connect(workerThread, &QThread::finished, workerThread, &QObject::deleteLater);
+        m_parser->moveToThread(workerThread);
+
+        workerThread->start();
     }
     reply->deleteLater();
+}
+
+void Subscription::parsingComplete(ArticleList *feedList)
+{
+    int previousCount = m_feedData->articleList().length();
+    QList<Article*> l = m_feedData->articleList();
+    l.append(feedList->articleList());
+
+    m_feedData->continuationToken() = feedList->continuationToken();
+    m_feedData->articleList() = l;
+
+    m_continuation = m_feedData->continuationToken();
+    m_unread = 0;
+    foreach(Article* v, m_feedData->articleList()) {
+        if(!v->state().contains("read")) {
+            m_unread++;
+        }
+    }
+    m_parser->thread()->exit();
+
+    if (previousCount == 0) {
+        emit updated();
+    } else {
+        emit itemsAppended(previousCount);
+    }
 }
 
 #include "subscription.moc"

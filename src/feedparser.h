@@ -37,10 +37,20 @@ public:
     explicit FeedParser(QObject* parent = 0);
     virtual ~FeedParser();
 
-    ArticleList* parseFeed(QString atom);
+    void setFeedString(QString atomText);
+
 private:
+    ArticleList* parseFeed(QString atom);
     Article* parseEntry(QDomElement entry);
     QString unescape(QString s);
+
+    QString m_atomText;
+
+public slots:
+    void beginParsing();
+
+signals:
+    void doneParsing(ArticleList* feedList);
 };
 
 #endif // FEEDPARSER_H

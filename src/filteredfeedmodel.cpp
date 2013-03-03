@@ -24,13 +24,13 @@ bool FilteredFeedModel::filterAcceptsRow(int source_row, const QModelIndex &sour
     QVariant filterData = sourceModel()->data(sourceModel()->index(source_row, 0, source_parent), filterRole());
     switch (filterRole()) {
     case FeedModel::unreadRole: {
-            bool ok;
-            int unreadCount = filterData.toInt(&ok);
-            return ok && unreadCount > 0;
-        }
+        bool ok;
+        int unreadCount = filterData.toInt(&ok);
+        return ok && unreadCount > 0;
+    }
     case -1: {
-            return true;
-        }
+        return true;
+    }
     }
     return false;
 }

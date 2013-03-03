@@ -34,6 +34,11 @@ FeedParser::~FeedParser()
 
 }
 
+void FeedParser::setFeedString(QString atomText)
+{
+    m_atomText = atomText;
+}
+
 /* Feed format
 <feed> - top container
  <generator uri="http://www.google.com/reader">Google Reader</generator> - where the feed was generated
@@ -82,7 +87,7 @@ there are then a list of categories which hold the items state(unread/read) and 
 ArticleList* FeedParser::parseFeed(QString atom)
 {
     QDomDocument doc;
-    ArticleList* map = new ArticleList();
+    ArticleList* map = new ArticleList(this);
     QList<Article*> entries;
     if(!doc.setContent(atom)) return new ArticleList();
 
@@ -107,7 +112,7 @@ ArticleList* FeedParser::parseFeed(QString atom)
 
 Article* FeedParser::parseEntry(QDomElement entry)
 {
-    Article* article = new Article();
+    Article* article = new Article(this);
     QDomNodeList l = entry.childNodes();
     for(int i = 0; i < l.length(); ++i) {
         QDomNode n = l.at(i);
@@ -164,7 +169,12 @@ QString FeedParser::unescape(QString s)
 {
     return s;
     //N.B!! Always replace the ampersand last
-// 	return s.replace("&lt;", "<").replace("&gt;", ">").replace("&amp;", "&");
+    // 	return s.replace("&lt;", "<").replace("&gt;", ">").replace("&amp;", "&");
+}
+
+void FeedParser::beginParsing()
+{
+    doneParsing(parseFeed(m_atomText));
 }
 
 #include "feedparser.moc"
