@@ -155,6 +155,7 @@ void Subscription::replyFinshed(QNetworkReply* reply)
         }
         m_atomText = QString::fromUtf8(reply->readAll());
         m_parser->setFeedString(m_atomText);
+        m_parser->setTargetThread(m_feedData->thread());
         QThread *workerThread = new QThread(this);
 
         connect(workerThread, &QThread::started, m_parser, &FeedParser::beginParsing);
@@ -172,8 +173,8 @@ void Subscription::parsingComplete(ArticleList *feedList)
     QList<Article*> l = m_feedData->articleList();
     l.append(feedList->articleList());
 
-    m_feedData->continuationToken() = feedList->continuationToken();
-    m_feedData->articleList() = l;
+    m_feedData->setContinuationToken(feedList->continuationToken());
+    m_feedData->setArticleList(l);
 
     m_continuation = m_feedData->continuationToken();
     m_unread = 0;

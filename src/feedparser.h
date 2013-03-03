@@ -38,13 +38,15 @@ public:
     virtual ~FeedParser();
 
     void setFeedString(QString atomText);
+    void setTargetThread(QThread *target);
 
 private:
-    ArticleList* parseFeed(QString atom);
+    ArticleList* parseFeed();
     Article* parseEntry(QDomElement entry);
     QString unescape(QString s);
 
     QString m_atomText;
+    QThread *m_targetThread;
 
 public slots:
     void beginParsing();
