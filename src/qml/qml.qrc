@@ -1,0 +1,12 @@
+<RCC>
+    <qresource prefix="/qml">
+        <file>WebAuth.qml</file>
+        <file>ReaderView.qml</file>
+        <file>StoryDelegate.qml</file>
+        <file>SubItem.qml</file>
+        <file>SubList.qml</file>
+        <file>ArticleListView.qml</file>
+        <file>ArticleView.qml</file>
+        <file>main.qml</file>
+    </qresource>
+</RCC>

@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/images">
+        <file>indicator-read.png</file>
+        <file>indicator-unread.png</file>
+        <file>refresh.png</file>
+    </qresource>
+</RCC>
