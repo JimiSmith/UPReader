@@ -7,6 +7,17 @@ Still in the early stages of development.
 
 It may or may not work for you
 
+To install and run on device
+============================
+
+* Open QtCreator, go to MenuBar->Tools->Ubuntu->Device->Enable->Cpp compiling.
+Ensure that completes successfully.
+* You will need to install cmake on your device. Open a ssh connection to your device (Ctrl-F10 in QtCreator)
+and run ````sudo apt-get install cmake````
+* Then open the project in QtCreator, go to MenuBar->Build->Ubuntu->Build C++ project on Ubuntu Device. Wait for that to finish successfully.
+* Open a ssh connection to your device. You should see a file named up-reader_0.1-1_armhf.deb or similar. Install that using dpkg. eg. ````sudo dpkg -i up-reader_0.1-1_armhf.deb````
+* Run ````/usr/bin/UPReader --desktop_file_hint=/usr/share/applications/up-reader.desktop```` on the device
+
 License
 =======
 
