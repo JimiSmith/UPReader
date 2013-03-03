@@ -163,3 +163,15 @@ bool Article::unread() const
 {
     return m_state.contains("read");
 }
+
+
+Article *Article::fromRecord(QSqlRecord record)
+{
+    Article *article = new Article();
+    article->setAuthor(record.value("author").toString());
+    article->setContent(record.value("content").toString());
+    article->setLink(record.value("link").toString());
+    article->setTitle(record.value("title").toString());
+    article->setArticleDomainName(record.value("article_domain_name").toString());
+    return article;
+}

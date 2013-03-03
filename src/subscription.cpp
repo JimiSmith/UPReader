@@ -19,6 +19,8 @@
 #include <QtCore/QDebug>
 #include <QtCore/qdatetime.h>
 #include <QThread>
+#include <QtSql/QSqlQuery>
+#include <QtSql/QSqlError>
 
 #include "subscription.h"
 #include "article.h"
@@ -26,17 +28,17 @@
 
 Subscription::Subscription()
 {
-    Subscription("");
+    Subscription("", "");
 }
 
-Subscription::Subscription(QString token, QObject* parent)
+Subscription::Subscription(QString token, QString id, QObject* parent)
     : QObject(parent)
 {
     m_accessToken = token;
+    m_id = id;
     m_netMan = new QNetworkAccessManager(this);
     m_parser = new FeedParser();
-    connect(m_parser, SIGNAL(doneParsing(ArticleList*)), this, SLOT(parsingComplete(ArticleList*)));
-    m_unread = -1;
+    connect(m_parser, SIGNAL(doneParsing()), this, SLOT(parsingComplete()));
     connect(m_netMan, SIGNAL(finished(QNetworkReply*)), this, SLOT(replyFinshed(QNetworkReply*)));
 }
 
@@ -45,12 +47,9 @@ Subscription::~Subscription()
     delete m_parser;
 }
 
-void Subscription::setId(QString id)
+QString Subscription::getTitle()
 {
-    m_id = id;
-    m_id.replace("?", "%3F");
-    m_id.replace("=", "%3D");
-    refresh();
+    return "Test";
 }
 
 QString Subscription::getId()
@@ -58,54 +57,25 @@ QString Subscription::getId()
     return m_id;
 }
 
-void Subscription::setTitle(QString title)
+QString Subscription::getContinuationToken()
 {
-    m_title = title;
 }
 
-QString Subscription::getTitle()
+int Subscription::getDBId()
 {
-    return m_title;
-}
+    QSqlQuery subQuery;
+    subQuery.prepare("SELECT id FROM subscriptions WHERE google_id=:google_id");
+    subQuery.bindValue(":google_id", m_id);
+    int id = 0;
+    if (subQuery.exec() && subQuery.next()) {
+        id = subQuery.value(0).toInt();
+    } else {
+        id = 0;
+    }
 
-void Subscription::setSortId(QString sortid)
-{
-    m_sortid = sortid;
-}
+    qDebug() << subQuery.lastError() << subQuery.lastQuery() << m_id;
 
-QString Subscription::getSortId()
-{
-    return m_sortid;
-}
-
-void Subscription::setCategories(QStringList cat)
-{
-    m_categories = cat;
-}
-
-QStringList Subscription::getCategories()
-{
-    return m_categories;
-}
-
-void Subscription::setOldestItemTime(int time)
-{
-    m_oldestItemTime = time;
-}
-
-int Subscription::getOldestItemTime()
-{
-    return m_oldestItemTime;
-}
-
-void Subscription::setUrl(QString url)
-{
-    m_url = url;
-}
-
-QString Subscription::getUrl()
-{
-    return m_url;
+    return id;
 }
 
 void Subscription::refresh()
@@ -117,7 +87,6 @@ void Subscription::refresh()
     //ck - current timestamp
     //c - a string indicating where to continue from. Each list that gets sent has a
     //gr:continuation tag in it - the content of that goes here
-    m_unread = -1;
     QString url = QString("https://www.google.com/reader/atom/%0?n=%1&ck=%2")
                   .arg(m_id).arg(QString::number(20)).arg(QDateTime::currentMSecsSinceEpoch());
     QNetworkRequest r(url);
@@ -129,13 +98,13 @@ void Subscription::fetchMore()
 {
     QString url = QString("https://www.google.com/reader/atom/%0?n=%1&ck=%2")
                   .arg(m_id).arg(QString::number(20)).arg(QDateTime::currentMSecsSinceEpoch());
-    if(!m_continuation.isEmpty()) {
-        url.append(QString("&c=%0").arg(m_continuation));
+    QString continuationToken = getContinuationToken();
+    if(!continuationToken.isEmpty()) {
+        url.append(QString("&c=%0").arg(continuationToken));
     }
     QNetworkRequest r(url);
     r.setRawHeader("Authorization", QString("OAuth %0").arg(m_accessToken).toUtf8());
     m_operations.insert(m_netMan->get(r), getMoreOP);
-    m_continuation.clear();
 }
 
 void Subscription::replyFinshed(QNetworkReply* reply)
@@ -144,18 +113,9 @@ void Subscription::replyFinshed(QNetworkReply* reply)
     if(!possibleRedirectUrl.isEmpty()) { //we're being redirected
         m_netMan->get(QNetworkRequest(possibleRedirectUrl));
     } else { //we're at the endpoint
-        switch(m_operations.value(reply)) {
-        case refreshOP: {
-            m_feedData = new ArticleList(this);
-            break;
-        }
-        case getMoreOP: {
-            break;
-        }
-        }
         m_atomText = QString::fromUtf8(reply->readAll());
         m_parser->setFeedString(m_atomText);
-        m_parser->setTargetThread(m_feedData->thread());
+        m_parser->setFeedId(m_id);
         QThread *workerThread = new QThread(this);
 
         connect(workerThread, &QThread::started, m_parser, &FeedParser::beginParsing);
@@ -167,29 +127,11 @@ void Subscription::replyFinshed(QNetworkReply* reply)
     reply->deleteLater();
 }
 
-void Subscription::parsingComplete(ArticleList *feedList)
+void Subscription::parsingComplete()
 {
-    int previousCount = m_feedData->articleList().length();
-    QList<Article*> l = m_feedData->articleList();
-    l.append(feedList->articleList());
-
-    m_feedData->setContinuationToken(feedList->continuationToken());
-    m_feedData->setArticleList(l);
-
-    m_continuation = m_feedData->continuationToken();
-    m_unread = 0;
-    foreach(Article* v, m_feedData->articleList()) {
-        if(!v->state().contains("read")) {
-            m_unread++;
-        }
-    }
     m_parser->thread()->exit();
 
-    if (previousCount == 0) {
-        emit updated();
-    } else {
-        emit itemsAppended(previousCount);
-    }
+    emit updated(this);
 }
 
 #include "subscription.moc"

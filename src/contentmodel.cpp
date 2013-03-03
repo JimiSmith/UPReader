@@ -18,14 +18,23 @@
 */
 
 #include <QtCore/QDebug>
+#include <QtSql/QSqlQuery>
+#include <QtSql/QSqlError>
+#include <QtSql/QSqlDriver>
+#include <QtSql/QSqlRecord>
 
 #include "contentmodel.h"
 #include "article.h"
 #include "articlelist.h"
 
-ContentModel::ContentModel(QObject* parent): QAbstractListModel(parent)
+ContentModel::ContentModel(QObject* parent)
+    : QmlSqlTableModel(parent)
 {
-    m_subscription = NULL;
+    m_subscription = 1;
+    setTable("articles");
+//    QSqlQuery q;
+//    q.prepare("SELECT * FROM articles LIMIT 1");
+//    setQuery(q);
 }
 
 ContentModel::~ContentModel()
@@ -33,82 +42,28 @@ ContentModel::~ContentModel()
 
 }
 
-QHash<int, QByteArray> ContentModel::roleNames() const
+void ContentModel::setSubscription(int sub)
 {
-    QHash<int, QByteArray> roles;
-    roles[titleRole] = "title";
-    roles[contentRole] = "content";
-    roles[authorRole] = "author";
-    roles[readRole] = "unread";
-    roles[summaryRole] = "summary";
-    return roles;
-}
-
-QVariant ContentModel::data(const QModelIndex& index, int role) const
-{
-    if(!index.isValid() || index.row() >= m_allItems->articleList().count()) return QVariant();
-
-    Article* entry = m_allItems->articleList().at(index.row());
-    switch(role) {
-    case titleRole: {
-        return entry->title();
-    }
-    case contentRole: {
-        return entry->content();
-    }
-    case authorRole: {
-        return entry->author();
-    }
-    case readRole: {
-        return entry->unread();
-    }
-    case summaryRole: {
-        return entry->summary();
-    }
-    }
-}
-
-int ContentModel::rowCount(const QModelIndex& parent) const
-{
-    if (m_subscription != NULL) {
-        ArticleList* feedData = m_subscription->getFeedData();
-        return feedData->articleList().length();
-    }
-}
-
-void ContentModel::setSubscription(Subscription* sub)
-{
-    beginResetModel();
     m_subscription = sub;
-    connect(m_subscription, SIGNAL(updated()), this, SLOT(updated()));
-    connect(m_subscription, SIGNAL(itemsAppended(int)), this, SLOT(itemsAppended(int)));
     updated();
-    endResetModel();
 }
 
 void ContentModel::updated()
 {
-    beginResetModel();
-    m_allItems = m_subscription->getFeedData();
-    endResetModel();
+    setFilter(QString("subscription_id='%1'").arg(m_subscription));
+    select();
 }
 
 void ContentModel::itemsAppended(int i)
 {
-    m_allItems = m_subscription->getFeedData();
-    beginInsertRows(QModelIndex(), i, m_allItems->articleList().size() - 1);
-    endInsertRows();
-}
-
-void ContentModel::fetchMore(const QModelIndex& parent)
-{
-    qDebug() << "fetching more";
-    m_subscription->fetchMore();
+//    setQuery();// TODO implement
+//    beginInsertRows(QModelIndex(), i, m_allItems->articleList().size() - 1);
+//    endInsertRows();
 }
 
 Article* ContentModel::getArticle(int ind)
 {
-    return m_allItems->articleList().at(ind);
+    return Article::fromRecord(record(ind));
 }
 
 #include "contentmodel.moc"

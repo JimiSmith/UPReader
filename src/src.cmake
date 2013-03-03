@@ -1,8 +1,6 @@
 # We add our source code here
-set(upreader_src src/filteredcontentmodel.cpp
-                 src/filteredfeedmodel.cpp
+set(upreader_src src/filteredfeedmodel.cpp
                  src/article.cpp
-                 src/articlelist.cpp
                  src/contentmodel.cpp
                  src/feedmodel.cpp
                  src/feedparser.cpp
@@ -10,14 +8,16 @@ set(upreader_src src/filteredcontentmodel.cpp
                  src/manager.cpp
                  src/upreader.cpp
                  src/upreaderapp.cpp
-                 src/main.cpp)
+                 src/main.cpp
+                 src/qmlsqltablemodel.cpp
+                 src/qmlsqlquerymodel.cpp)
 
 include(src/qml/qml.cmake)
 
 # Now make sure all files get to the right place
 add_executable(UPReader ${upreader_src} ${upreader_qml_resources} ${upreader_image_resources})
 
-qt5_use_modules(UPReader Quick Qml Widgets Core Xml)
+qt5_use_modules(UPReader Quick Qml Widgets Core Xml Sql)
 
 INSTALL(TARGETS UPReader
     RUNTIME DESTINATION bin)

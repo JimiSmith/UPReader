@@ -18,6 +18,8 @@
 */
 #include <QtXml/QtXml>
 #include <QtCore/QDebug>
+#include <QtSql/QSqlQuery>
+#include <QtSql/QSqlError>
 
 #include "feedparser.h"
 #include "articlelist.h"
@@ -39,9 +41,9 @@ void FeedParser::setFeedString(QString atomText)
     m_atomText = atomText;
 }
 
-void FeedParser::setTargetThread(QThread *target)
+void FeedParser::setFeedId(QString id)
 {
-    m_targetThread = target;
+    m_id = id;
 }
 
 /* Feed format
@@ -89,36 +91,64 @@ there are then a list of categories which hold the items state(unread/read) and 
 
 */
 
-ArticleList* FeedParser::parseFeed()
+void FeedParser::parseFeed()
 {
+    bool error = false;
+
+    QSqlQuery subQuery;
+    subQuery.prepare("SELECT id FROM subscriptions WHERE google_id=:google_id");
+    subQuery.bindValue(":google_id", m_id);
+    int id = 0;
+    if (subQuery.exec() && subQuery.next()) {
+        id = subQuery.value(0).toInt();
+    } else {
+        return;
+    }
+
+    QSqlDatabase::database().transaction();
     QDomDocument doc;
-    ArticleList* map = new ArticleList(this);
-    QList<Article*> entries;
-    if(!doc.setContent(m_atomText)) return new ArticleList();
+    int unread = 0;
+    if(!doc.setContent(m_atomText)) return;
 
     QDomElement root = doc.documentElement();
-    if(root.tagName() != "feed") return new ArticleList();
+    if(root.tagName() != "feed") return;
     QDomNodeList l = root.childNodes();
     for(int i = 0; i < l.length(); ++i) {
         QDomNode n = l.at(i);
         QDomElement e = n.toElement();
         if(!e.isNull()) {
             if(e.tagName() == "gr:continuation") { //the first element we're interested in is the gr:continuation element
-                map->setContinuationToken(e.text());
+//                map->setContinuationToken(e.text());
             } else if(e.tagName() == "entry") { //next is the entry element
-                Article* entry = parseEntry(e);
-                entry->moveToThread(m_targetThread);
-                entries.append(entry);
+                bool entryUnread = parseEntry(e, id, error);
+                if (error) {
+                    break;
+                }
+                if (entryUnread) {
+                    unread++;
+                }
             }
         }
     }
-    map->setArticleList(entries);
-    return map;
+    if (error) {
+        QSqlDatabase::database().rollback();
+    } else {
+        QSqlDatabase::database().commit();
+    }
+
+    QSqlQuery dataQuery;
+    dataQuery.prepare("UPDATE subscriptions SET unread=:unread, needs_update=0 WHERE google_id=:google_id");
+    dataQuery.bindValue(":unread", QString::number(unread));
+    dataQuery.bindValue(":google_id", m_id);
+    dataQuery.exec();
 }
 
-Article* FeedParser::parseEntry(QDomElement entry)
+bool FeedParser::parseEntry(QDomElement entry, int id, bool &error)
 {
-    Article* article = new Article();
+    error = false;
+    QHash<QString, QString> data;
+    QStringList states;
+    bool unread = false;
     QDomNodeList l = entry.childNodes();
     for(int i = 0; i < l.length(); ++i) {
         QDomNode n = l.at(i);
@@ -127,30 +157,30 @@ Article* FeedParser::parseEntry(QDomElement entry)
             if(e.tagName() == "category") { //the category tag contains the read status
                 if(e.attribute("term").contains("/state/com.google/")) { //this will represent one of googles states(e.g. read)
                     QString state = e.attribute("term").split("/").last();
-                    article->addState(state);
+                    states.append(state);
                 } else { //tag name?
-                    article->addState(e.attribute("term"));
+                    states.append(e.attribute("term"));
                 }
+            } else if(e.tagName() == "id") {
+                data.insert("google_id", e.text());
             } else if(e.tagName() == "title") {
-//				map.insert("titleType", e.attribute("type"));
-                article->setTitle(e.text());
+                data.insert("title", e.text());
             } else if(e.tagName() == "published") {
                 QDateTime t = QDateTime::fromString("yyyy-MM-ddTHH:mm:ssZ"); //2011-05-18T21:05:53Z
-                article->setPublished(t);
+                data.insert("published", t.toString());
             } else if(e.tagName() == "updated") {
                 QDateTime t = QDateTime::fromString("yyyy-MM-ddTHH:mm:ssZ"); //2011-05-18T21:05:53Z
-                article->setUpdated(t);
+                data.insert("updated", t.toString());
             } else if(e.tagName() == "link") {
-                article->setLink(e.attribute("href"));
+                data.insert("link", e.attribute("href"));
             } else if((e.tagName() == "content") || (e.tagName() == "summary")) { //the fun part
-                article->setArticleDomainName(e.attribute("xml:base"));
+                data.insert("article_domain_name", e.attribute("xml:base"));
                 QString type = e.attribute("type");
-                article->setContentType(type);
                 QString content = e.text();
                 if(type == "html" || type == "text") {
                     content = unescape(content);
                 }
-                article->setContent(content);
+                data.insert("content", content);
             } else if(e.tagName() == "author") {
                 //lets find the name of the author - not interested in the other stuff that can be here as well
                 QString author;
@@ -164,11 +194,63 @@ Article* FeedParser::parseEntry(QDomElement entry)
                         }
                     }
                 }
-                article->setAuthor(author);
+                data.insert("author", author);
             }
         }
     }
-    return article;
+    unread = !states.contains("read");
+
+    QString google_id = data.value("google_id");
+
+    google_id.replace("?", "%3F");
+    google_id.replace("=", "%3D");
+
+    QSqlQuery existsQuery;
+    existsQuery.prepare("SELECT count(google_id) FROM articles WHERE google_id=:google_id");
+    existsQuery.bindValue(":google_id", google_id);
+    bool existsRet = existsQuery.exec();
+
+    if (!existsRet) {
+        qWarning() << "Error with exists query" << existsQuery.lastError();
+        error = true;
+        return false;
+    }
+
+    bool exists = existsQuery.next() && existsQuery.value(0).toInt() > 0;
+
+    QSqlQuery dataQuery;
+
+    if (exists) {
+        dataQuery.prepare("UPDATE articles SET title=:title, link=:link, "
+                          "published=:published, updated=:updated, "
+                          "article_domain_name=:article_domain_name, author=:author, "
+                          "content=:content, unread=:unread, subscription_id=:subscription_id "
+                          "WHERE google_id=:google_id");
+    } else {
+        dataQuery.prepare("INSERT INTO articles (google_id, title, link, published, updated, article_domain_name, author, content, unread, subscription_id) "
+                          "VALUES (:google_id, :title, :link, :published, :updated, :article_domain_name, :author, :content, :unread, :subscription_id)");
+    }
+
+    dataQuery.bindValue(":google_id", google_id);
+    dataQuery.bindValue(":title", data.value("title", ""));
+    dataQuery.bindValue(":link", data.value("link", ""));
+    dataQuery.bindValue(":published", data.value("published", ""));
+    dataQuery.bindValue(":updated", data.value("updated", ""));
+    dataQuery.bindValue(":article_domain_name", data.value("article_domain_name", ""));
+    dataQuery.bindValue(":author", data.value("author", ""));
+    dataQuery.bindValue(":content", data.value("content", ""));
+    dataQuery.bindValue(":unread", unread);
+    dataQuery.bindValue(":subscription_id", id);
+
+    bool dataRet = dataQuery.exec();
+
+    if (!dataRet) {
+        qWarning() << "Error with update query" << dataQuery.lastError() << dataQuery.executedQuery();
+        error = true;
+        return false;
+    }
+
+    return unread;
 }
 
 QString FeedParser::unescape(QString s)
@@ -180,7 +262,8 @@ QString FeedParser::unescape(QString s)
 
 void FeedParser::beginParsing()
 {
-    doneParsing(parseFeed());
+    parseFeed();
+    doneParsing();
 }
 
 #include "feedparser.moc"

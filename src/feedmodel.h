@@ -24,17 +24,17 @@
 #include <QtCore/QDebug>
 #include <QtCore/QSignalMapper>
 
+#include "qmlsqltablemodel.h"
 #include "manager.h"
 
 class Subscription;
 
-class FeedModel : public QAbstractListModel
+class FeedModel : public QmlSqlTableModel
 {
     Q_OBJECT
     Q_PROPERTY(QString accessToken READ getAccessToken WRITE setAccessToken)
     Q_PROPERTY(QString refreshToken READ getRefreshToken WRITE setRefreshToken)
 public:
-    enum roles { titleRole = Qt::UserRole + 1, unreadRole, idRole };
 
     FeedModel(QObject* parent = 0);
     virtual ~FeedModel();
@@ -56,27 +56,18 @@ public:
     QString getRefreshToken() {
         return m_refreshToken;
     }
-    Q_INVOKABLE Subscription* getSubscription(QString id);
 
     Q_INVOKABLE void refresh();
-
-    virtual QHash<int, QByteArray> roleNames() const;
-    virtual QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const;
-    virtual int rowCount(const QModelIndex& parent = QModelIndex()) const;
 
 private:
     QString m_accessToken;
     QString m_refreshToken;
-    QList<Subscription*> m_subList;
     Manager* m_man;
     QSignalMapper* m_mapper;
 
 private slots:
-    void setSubList(QList<Subscription*> subList);
-    void subUpdated(int row);
-
-signals:
-    void subListUpdated();
+    void updateSubList();
+    void updateSub(QString id);
 };
 
 #endif // FEEDMODEL_H

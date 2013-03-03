@@ -59,8 +59,9 @@ Page {
                     delegate: SubItem {
                         itemTitle: title
                         unreadCount: unread
+                        updating: needs_update
                         onClicked: {
-                            itemClicked(feedModel.getSubscription(id));
+                            itemClicked(id, title);
                         }
                     }
                 }
@@ -84,8 +85,9 @@ Page {
                     delegate: SubItem {
                         itemTitle: title
                         unreadCount: unread
+                        updating: needs_update
                         onClicked: {
-                            itemClicked(feedModel.getSubscription(id));
+                            itemClicked(id, title);
                         }
                     }
                 }

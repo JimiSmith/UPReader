@@ -21,6 +21,7 @@
 #define UPREADERAPP_H
 
 #include <QApplication>
+#include <QtSql/QSqlDatabase>
 
 class QQuickView;
 
@@ -32,8 +33,15 @@ public:
     void initialize();
     int exec();
 
+private slots:
+    void onExit();
+
 private:
+    void setupDB();
+    void createTableIfNeeded(QString tableName, QStringList values);
+
     QQuickView *m_view;
+    QSqlDatabase m_appDB;
 
 };
 

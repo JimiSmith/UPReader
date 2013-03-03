@@ -6,6 +6,7 @@ find_package(Qt5Core REQUIRED)
 find_package(Qt5Widgets REQUIRED)
 find_package(Qt5Quick REQUIRED)
 find_package(Qt5Xml REQUIRED)
+find_package(Qt5Sql REQUIRED)
 
 set(CMAKE_AUTOMOC ON)
   # As moc files are generated in the binary dir, tell CMake

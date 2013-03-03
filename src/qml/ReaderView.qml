@@ -49,7 +49,7 @@ PageStack {
         SubList {
             anchors.fill: parent
             onItemClicked: {
-                pageStack.push(Qt.resolvedUrl('ArticleListView.qml'), {subscription: subscription});
+                pageStack.push(Qt.resolvedUrl('ArticleListView.qml'), {subscription: subscription, title: title});
             }
         }
     }

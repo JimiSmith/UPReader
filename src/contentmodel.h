@@ -23,37 +23,27 @@
 #include <QtCore/QAbstractListModel>
 #include <QtCore/QDebug>
 
+#include "qmlsqltablemodel.h"
 #include "subscription.h"
 
-class ContentModel : public QAbstractListModel
+class ContentModel : public QmlSqlTableModel
 {
     Q_OBJECT
-    enum roles { titleRole = Qt::UserRole + 1, contentRole, authorRole, readRole, summaryRole };
+    Q_PROPERTY(int subscription READ getSubscription WRITE setSubscription)
 
 public:
     explicit ContentModel(QObject* parent = 0);
     virtual ~ContentModel();
 
-    virtual QHash<int, QByteArray> roleNames() const;
-    virtual QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const;
-    virtual int rowCount(const QModelIndex& parent = QModelIndex()) const;
-
-    Subscription* getSubscription() {
+    int getSubscription() {
         return m_subscription;
     }
-    void setSubscription(Subscription* sub);
-
-    virtual bool canFetchMore(const QModelIndex& parent) const {
-        qDebug() << "checking" << m_subscription->getTitle() << m_subscription->canFetchMore();
-        return m_subscription->canFetchMore();
-    }
-    virtual void fetchMore(const QModelIndex& parent);
+    void setSubscription(int sub);
 
     Q_INVOKABLE Article* getArticle(int ind);
 
 private:
-    Subscription* m_subscription;
-    ArticleList* m_allItems;
+    int m_subscription;
 
 private slots:
     void updated();

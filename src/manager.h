@@ -46,13 +46,17 @@ private:
     QMap<QNetworkReply*, opType> m_operations;
     QString m_accessToken;
     QString m_refreshToken;
-    QList<Subscription*> m_subList;
+
+    bool addOrUpdateSub(QVariantMap subData);
+    bool syncSubscriptions();
 
 private slots:
     void replyFinshed(QNetworkReply* reply);
+    void subUpdated(Subscription *sub);
 
 signals:
-    void updatedSubList(QList<Subscription*>);
+    void updateSub(QString id);
+    void updateSubList();
 };
 
 #endif // MANAGER_H

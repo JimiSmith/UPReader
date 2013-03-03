@@ -14,15 +14,19 @@ public:
 
     void setFilter(QString filter);
 
+    void setSourceModel(QAbstractItemModel *sourceModel);
+
     virtual bool filterAcceptsRow(int source_row, const QModelIndex& source_parent) const;
 
     virtual bool canFetchMore(const QModelIndex& parent) const {
-        return false;
+        return sourceModel()->canFetchMore(parent);
     }
-// 	virtual bool canFetchMore(const QModelIndex& parent) const { return sourceModel()->canFetchMore(parent); }
     virtual void fetchMore(const QModelIndex& parent) {
         sourceModel()->fetchMore(parent);
     }
+
+private:
+    QString m_filter;
 };
 
 #endif // FILTEREDFEEDMODEL_H

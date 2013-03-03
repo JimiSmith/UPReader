@@ -19,11 +19,13 @@
 
 #include <QQuickView>
 #include <QtQuick>
+#include <QtSql/QSqlQuery>
+#include <QtSql/QSqlError>
 
 #include "upreader.h"
 #include "feedmodel.h"
 #include "filteredfeedmodel.h"
-#include "filteredcontentmodel.h"
+#include "contentmodel.h"
 #include "article.h"
 #include "upreaderapp.h"
 
@@ -59,6 +61,9 @@ UPReaderApp::UPReaderApp(int& argc, char** argv) :
 
 void UPReaderApp::initialize()
 {
+    //open sqlite DB
+    setupDB();
+
     m_view = new QQuickView();
     m_view->setResizeMode(QQuickView::SizeRootObjectToView);
     m_view->setTitle("UPReader");
@@ -70,7 +75,7 @@ void UPReaderApp::initialize()
     qmlRegisterType<Auth>("UPReader", 0, 1, "Auth");
     qmlRegisterType<FeedModel>("UPReader", 0, 1, "FeedModel");
     qmlRegisterType<FilteredFeedModel>("UPReader", 0, 1, "FilteredFeedModel");
-    qmlRegisterType<FilteredContentModel>("UPReader", 0, 1, "ContentModel");
+    qmlRegisterType<ContentModel>("UPReader", 0, 1, "ContentModel");
     qmlRegisterType<Subscription>("UPReader", 0, 1, "Subscription");
     qmlRegisterType<Article>("UPReader", 0, 1, "Article");
     qRegisterMetaType<QList<Subscription*> >("QList<Subscription*>");
@@ -78,6 +83,8 @@ void UPReaderApp::initialize()
     qRegisterMetaType<QAbstractItemModel* >("QAbstractItemModel*");
     m_view->engine()->addImportPath("qrc:/qml/");
     m_view->setSource(QUrl("qrc:/qml/main.qml"));
+
+    connect(this, SIGNAL(aboutToQuit()), this, SLOT(onExit()));
 }
 
 int UPReaderApp::exec()
@@ -85,4 +92,82 @@ int UPReaderApp::exec()
     Q_ASSERT(m_view != 0);
     m_view->show();
     return QApplication::exec();
+}
+
+void UPReaderApp::onExit()
+{
+    qDebug() << "Going down";
+    m_appDB.close();
+}
+
+void UPReaderApp::setupDB()
+{
+    QString path = QStandardPaths::writableLocation(QStandardPaths::DataLocation);
+    QDir dir = QDir(path);
+    dir.mkpath(path);
+    QString absPath = dir.absoluteFilePath("up-reader.db");
+    m_appDB = QSqlDatabase::addDatabase("QSQLITE");
+    m_appDB.setDatabaseName(absPath);
+    m_appDB.open();
+
+    if (m_appDB.isOpen()) {
+        QStringList tableValues;
+        tableValues.append("id integer primary key");
+        tableValues.append("title text");
+        tableValues.append("url text");
+        tableValues.append("continuation text");
+        tableValues.append("google_id text");
+        tableValues.append("unread integer");
+        tableValues.append("needs_update integer");
+        createTableIfNeeded("subscriptions", tableValues);
+
+        QStringList articleValues;
+        articleValues.append("id integer primary key");
+        articleValues.append("subscription_id integer");
+        articleValues.append("content text");
+        articleValues.append("summary text");
+        articleValues.append("title text");
+        articleValues.append("link text");
+        articleValues.append("published text");
+        articleValues.append("updated text");
+        articleValues.append("author text");
+        articleValues.append("unread integer");
+        articleValues.append("article_domain_name text");
+        articleValues.append("google_id text");
+        createTableIfNeeded("articles", articleValues);
+
+    } else {
+        qWarning() << "DB not open";
+    }
+}
+
+void UPReaderApp::createTableIfNeeded(QString tableName, QStringList values)
+{
+    QSqlQuery tableQuery;
+    QString sqlQuery = QString("SELECT count(name) FROM sqlite_master WHERE type = 'table' AND name = '%1'").arg(tableName);
+    bool tableRet = tableQuery.exec(sqlQuery);
+
+    if (!tableRet) {
+        qWarning() << "There was an error creating the DB:" << tableQuery.lastError();
+    }
+
+    if (tableQuery.first() && tableQuery.value(0).toInt() > 0) {
+        return;
+    }
+
+    QSqlQuery createQuery;
+    QString sqlCreateQuery = QString("CREATE TABLE %1 (").arg(tableName);
+
+    foreach (QString v, values) {
+        sqlCreateQuery.append(v).append(",");
+    }
+
+    sqlCreateQuery.chop(1); //remove the final comma
+    sqlCreateQuery.append(")");
+
+    bool ret = createQuery.exec(sqlCreateQuery);
+
+    if (!ret) {
+        qWarning() << "There was an error creating the DB:" << createQuery.lastError();
+    }
 }

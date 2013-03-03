@@ -24,6 +24,7 @@
 #include <QtCore/QObject>
 #include <QStringList>
 #include <QDate>
+#include <QSqlRecord>
 
 class Article : public QObject
 {
@@ -34,6 +35,8 @@ class Article : public QObject
     Q_PROPERTY(bool unread READ unread NOTIFY updated)
     Q_PROPERTY(QString articleDomainName READ articleDomainName NOTIFY updated)
 public:
+    static Article* fromRecord(QSqlRecord record);
+
     explicit Article(QObject* parent = 0);
     virtual ~Article();
 

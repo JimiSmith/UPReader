@@ -36,8 +36,6 @@ Page {
         }
     }
 
-    title: subscription.title
-
     ListView {
         id: content
         anchors.fill: parent
@@ -58,7 +56,7 @@ Page {
                 pageStack.push(Qt.resolvedUrl('ArticleView.qml'), {article: contentModel.getArticle(index)})
             }
             UbuntuShape {
-                color: unread ? '#AEA79F' : '#DD4814'
+                color: unread ? '#DD4814' : '#AEA79F'
                 width: units.gu(1)
                 height: units.gu(1)
                 anchors {
