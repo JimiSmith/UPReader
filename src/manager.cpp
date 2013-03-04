@@ -23,11 +23,13 @@
 #include <QtSql/QSqlError>
 
 #include "manager.h"
+#include "sqlhelper.h"
 
 Manager::Manager(QObject* parent)
     : QObject(parent)
 {
     m_netMan = new QNetworkAccessManager(this);
+    connect(&m_watcher, SIGNAL(finished()), this, SIGNAL(updateSubList()));
     connect(m_netMan, SIGNAL(finished(QNetworkReply*)), this, SLOT(replyFinshed(QNetworkReply*)));
 }
 
@@ -48,6 +50,16 @@ void Manager::setRefreshToken(QString refresh)
 
 void Manager::refreshSubList()
 {
+    disconnect(&m_watcher, SIGNAL(finished()), this, SLOT(syncSubscriptions()));
+    connect(&m_watcher, SIGNAL(finished()), this, SLOT(refreshSubscriptions()));
+    QFuture<bool> subAddFuture = QtConcurrent::run(SqlHelper::setAllSubsToLoadingState);
+    m_watcher.setFuture(subAddFuture);
+}
+
+void Manager::refreshSubscriptions()
+{
+    disconnect(&m_watcher, SIGNAL(finished()), this, SLOT(refreshSubscriptions()));
+    connect(&m_watcher, SIGNAL(finished()), this, SLOT(syncSubscriptions()));
     // cancel all running operations
     foreach (QNetworkReply* reply, m_operations.keys()) {
         reply->abort();
@@ -65,61 +77,14 @@ void Manager::replyFinshed(QNetworkReply* reply)
     QVariant result = sd.toVariant();
     switch(m_operations.value(reply)) {
     case listOP: {
-        QVariantList t = result.toMap().value("subscriptions").toList();
-        foreach(QVariant v, t) {
-            addOrUpdateSub(v.toMap());
-        }
-        emit updateSubList();
+        QVariantList subList = result.toMap().value("subscriptions").toList();
+        QFuture<bool> subAddFuture = QtConcurrent::run(SqlHelper::addOrUpdateSubBatch, subList);
+        m_watcher.setFuture(subAddFuture);
     }
     }
-    syncSubscriptions();
 }
 
-bool Manager::addOrUpdateSub(QVariantMap subData)
-{
-    QSqlDatabase::database().transaction();
-
-    QString id = subData.value("id").toString();
-
-    id.replace("?", "%3F");
-    id.replace("=", "%3D");
-
-    QSqlQuery existsQuery;
-    existsQuery.prepare("SELECT count(google_id) FROM subscriptions WHERE google_id=:google_id");
-    existsQuery.bindValue(":google_id", id);
-    bool existsRet = existsQuery.exec();
-
-    if (!existsRet) {
-        QSqlDatabase::database().rollback();
-        return false;
-    }
-
-    bool exists = existsQuery.next() && existsQuery.value(0).toInt() > 0;
-
-    QSqlQuery dataQuery;
-
-    if (exists) {
-        dataQuery.prepare("UPDATE subscriptions SET title=:title, needs_update=1, url=:url, continuation=NULL WHERE google_id=:google_id");
-    } else {
-        dataQuery.prepare("INSERT INTO subscriptions (google_id, title, url, unread, continuation, needs_update) VALUES (:google_id, :title, :url, 0, NULL, 1)");
-    }
-
-    dataQuery.bindValue(":google_id", id);
-    dataQuery.bindValue(":title", subData.value("title").toString());
-    dataQuery.bindValue(":url", subData.value("htmlUrl").toString());
-
-    bool dataRet = dataQuery.exec();
-
-    if (!dataRet) {
-        QSqlDatabase::database().rollback();
-        return false;
-    }
-    QSqlDatabase::database().commit();
-
-    return true;
-}
-
-bool Manager::syncSubscriptions()
+void Manager::syncSubscriptions()
 {
     QSqlQuery query;
     query.exec("SELECT google_id FROM subscriptions WHERE needs_update=1 LIMIT 1");

@@ -9,6 +9,7 @@ set(upreader_src src/filteredfeedmodel.cpp
                  src/upreader.cpp
                  src/upreaderapp.cpp
                  src/main.cpp
+                 src/sqlhelper.cpp
                  src/qmlsqltablemodel.cpp
                  src/qmlsqlquerymodel.cpp)
 

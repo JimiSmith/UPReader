@@ -19,8 +19,6 @@
 
 #include <QQuickView>
 #include <QtQuick>
-#include <QtSql/QSqlQuery>
-#include <QtSql/QSqlError>
 
 #include "upreader.h"
 #include "feedmodel.h"
@@ -28,6 +26,7 @@
 #include "contentmodel.h"
 #include "article.h"
 #include "upreaderapp.h"
+#include "sqlhelper.h"
 
 static float getGridUnit()
 {
@@ -119,7 +118,7 @@ void UPReaderApp::setupDB()
         tableValues.append("google_id text");
         tableValues.append("unread integer");
         tableValues.append("needs_update integer");
-        createTableIfNeeded("subscriptions", tableValues);
+        SqlHelper::createTableIfNeeded(QString("subscriptions"), tableValues);
 
         QStringList articleValues;
         articleValues.append("id integer primary key");
@@ -134,40 +133,9 @@ void UPReaderApp::setupDB()
         articleValues.append("unread integer");
         articleValues.append("article_domain_name text");
         articleValues.append("google_id text");
-        createTableIfNeeded("articles", articleValues);
+        SqlHelper::createTableIfNeeded(QString("articles"), articleValues);
 
     } else {
         qWarning() << "DB not open";
-    }
-}
-
-void UPReaderApp::createTableIfNeeded(QString tableName, QStringList values)
-{
-    QSqlQuery tableQuery;
-    QString sqlQuery = QString("SELECT count(name) FROM sqlite_master WHERE type = 'table' AND name = '%1'").arg(tableName);
-    bool tableRet = tableQuery.exec(sqlQuery);
-
-    if (!tableRet) {
-        qWarning() << "There was an error creating the DB:" << tableQuery.lastError();
-    }
-
-    if (tableQuery.first() && tableQuery.value(0).toInt() > 0) {
-        return;
-    }
-
-    QSqlQuery createQuery;
-    QString sqlCreateQuery = QString("CREATE TABLE %1 (").arg(tableName);
-
-    foreach (QString v, values) {
-        sqlCreateQuery.append(v).append(",");
-    }
-
-    sqlCreateQuery.chop(1); //remove the final comma
-    sqlCreateQuery.append(")");
-
-    bool ret = createQuery.exec(sqlCreateQuery);
-
-    if (!ret) {
-        qWarning() << "There was an error creating the DB:" << createQuery.lastError();
     }
 }

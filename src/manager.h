@@ -26,6 +26,8 @@
 #include <QtNetwork/QNetworkReply>
 #include <QtNetwork/QNetworkRequest>
 #include <QtCore/QMap>
+#include <QtConcurrent>
+
 #include "subscription.h"
 
 class Manager : public QObject
@@ -46,13 +48,13 @@ private:
     QMap<QNetworkReply*, opType> m_operations;
     QString m_accessToken;
     QString m_refreshToken;
-
-    bool addOrUpdateSub(QVariantMap subData);
-    bool syncSubscriptions();
+    QFutureWatcher<bool> m_watcher;
 
 private slots:
     void replyFinshed(QNetworkReply* reply);
     void subUpdated(Subscription *sub);
+    void syncSubscriptions();
+    void refreshSubscriptions();
 
 signals:
     void updateSub(QString id);

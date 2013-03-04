@@ -38,7 +38,6 @@ private slots:
 
 private:
     void setupDB();
-    void createTableIfNeeded(QString tableName, QStringList values);
 
     QQuickView *m_view;
     QSqlDatabase m_appDB;

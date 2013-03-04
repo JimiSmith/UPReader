@@ -7,6 +7,7 @@ find_package(Qt5Widgets REQUIRED)
 find_package(Qt5Quick REQUIRED)
 find_package(Qt5Xml REQUIRED)
 find_package(Qt5Sql REQUIRED)
+find_package(Qt5Concurrent REQUIRED)
 
 set(CMAKE_AUTOMOC ON)
   # As moc files are generated in the binary dir, tell CMake
@@ -17,8 +18,8 @@ include_directories(
         ${CMAKE_SOURCE_DIR}
         ${CMAKE_BINARY_DIR}
         ${Qt5Quick_INCLUDE_DIRS}
+        ${Qt5Concurrent_INCLUDE_DIRS}
 )
-
 
 qt5_add_resources(upreader_image_resources images/images.qrc)
 
