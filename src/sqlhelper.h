@@ -8,6 +8,12 @@ public:
     static bool addOrUpdateSubBatch(QVariantList subData);
     static bool addOrUpdateSub(QVariantMap subData);
     static bool setAllSubsToLoadingState();
+    static QString firstSubToUpdate();
+    static int subIdForGoogleId(QString googleId);
+    static bool updateUnreadCountForGoogleId(QString googleId, int unread);
+
+    static bool addOrUpdateArticleBatch(QVariantList articleList);
+    static bool addOrUpdateArticle(QVariantMap articleData);
 };
 
 #endif // SQLHELPER_H

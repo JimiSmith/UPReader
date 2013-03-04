@@ -42,7 +42,7 @@ public:
 
 private:
     void parseFeed();
-    bool parseEntry(QDomElement entry, int id, bool &error);
+    QVariantMap parseEntry(QDomElement entry, int id);
     QString unescape(QString s);
 
     QString m_atomText;

@@ -19,12 +19,11 @@
 #include <QtCore/QDebug>
 #include <QtCore/qdatetime.h>
 #include <QThread>
-#include <QtSql/QSqlQuery>
-#include <QtSql/QSqlError>
 
 #include "subscription.h"
 #include "article.h"
 #include "articlelist.h"
+#include "sqlhelper.h"
 
 Subscription::Subscription()
 {
@@ -63,19 +62,7 @@ QString Subscription::getContinuationToken()
 
 int Subscription::getDBId()
 {
-    QSqlQuery subQuery;
-    subQuery.prepare("SELECT id FROM subscriptions WHERE google_id=:google_id");
-    subQuery.bindValue(":google_id", m_id);
-    int id = 0;
-    if (subQuery.exec() && subQuery.next()) {
-        id = subQuery.value(0).toInt();
-    } else {
-        id = 0;
-    }
-
-    qDebug() << subQuery.lastError() << subQuery.lastQuery() << m_id;
-
-    return id;
+    return SqlHelper::subIdForGoogleId(m_id);
 }
 
 void Subscription::refresh()

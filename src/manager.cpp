@@ -19,8 +19,6 @@
 
 #include <QtCore/QDebug>
 #include <QJsonDocument>
-#include <QtSql/QSqlQuery>
-#include <QtSql/QSqlError>
 
 #include "manager.h"
 #include "sqlhelper.h"
@@ -72,7 +70,6 @@ void Manager::refreshSubscriptions()
 void Manager::replyFinshed(QNetworkReply* reply)
 {
     QByteArray json = reply->readAll();
-//    qDebug() << json;
     QJsonDocument sd = QJsonDocument::fromJson(json);
     QVariant result = sd.toVariant();
     switch(m_operations.value(reply)) {
@@ -86,15 +83,10 @@ void Manager::replyFinshed(QNetworkReply* reply)
 
 void Manager::syncSubscriptions()
 {
-    QSqlQuery query;
-    query.exec("SELECT google_id FROM subscriptions WHERE needs_update=1 LIMIT 1");
-    if (query.next()) {
-        QString google_id = query.value(0).toString();
-        Subscription *s = new Subscription(m_accessToken, google_id, this);
-        connect(s, SIGNAL(updated(Subscription*)), this, SLOT(subUpdated(Subscription*)));
-        s->refresh();
-
-    }
+    QString google_id = SqlHelper::firstSubToUpdate();
+    Subscription *s = new Subscription(m_accessToken, google_id, this);
+    connect(s, SIGNAL(updated(Subscription*)), this, SLOT(subUpdated(Subscription*)));
+    s->refresh();
 }
 
 void Manager::subUpdated(Subscription *sub)
