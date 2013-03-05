@@ -52,9 +52,6 @@ bool SqlHelper::addOrUpdateSub(QVariantMap subData)
 
     QString id = subData.value("id").toString();
 
-    id.replace("?", "%3F");
-    id.replace("=", "%3D");
-
     QSqlQuery existsQuery;
     existsQuery.prepare("SELECT count(google_id) FROM subscriptions WHERE google_id=:google_id");
     existsQuery.bindValue(":google_id", id);
@@ -159,9 +156,6 @@ bool SqlHelper::addOrUpdateArticleBatch(QVariantList articleList)
 bool SqlHelper::addOrUpdateArticle(QVariantMap articleData)
 {
     QString google_id = articleData.value("google_id").toString();
-
-    google_id.replace("?", "%3F");
-    google_id.replace("=", "%3D");
 
     QSqlQuery existsQuery;
     existsQuery.prepare("SELECT count(google_id) FROM articles WHERE google_id=:google_id");

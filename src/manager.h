@@ -24,7 +24,6 @@
 #include <QtCore/QObject>
 #include <QtNetwork/QNetworkAccessManager>
 #include <QtNetwork/QNetworkReply>
-#include <QtNetwork/QNetworkRequest>
 #include <QtCore/QMap>
 #include <QtConcurrent>
 

@@ -23,6 +23,7 @@
 #include "subscription.h"
 #include "article.h"
 #include "articlelist.h"
+#include "apihelper.h"
 #include "sqlhelper.h"
 
 Subscription::Subscription()
@@ -67,31 +68,26 @@ int Subscription::getDBId()
 
 void Subscription::refresh()
 {
-    //to get the feed we need to make a get call to https://www.google.com/reader/atom/
-    //followed by the feed id
-    //important parameters are
-    //n - number of items to return
-    //ck - current timestamp
-    //c - a string indicating where to continue from. Each list that gets sent has a
-    //gr:continuation tag in it - the content of that goes here
-    QString url = QString("https://www.google.com/reader/atom/%0?n=%1&ck=%2")
-                  .arg(m_id).arg(QString::number(20)).arg(QDateTime::currentMSecsSinceEpoch());
-    QNetworkRequest r(url);
-    r.setRawHeader("Authorization", QString("OAuth %0").arg(m_accessToken).toUtf8());
-    m_operations.insert(m_netMan->get(r), refreshOP);
+    if (m_id.isEmpty()) {
+        qWarning() << "Can't refresh with an empty feed id";
+        return;
+    }
+    QMap<QString, QString> params;
+    params.insert("n", "20");
+    params.insert("ck", QString::number(QDateTime::currentMSecsSinceEpoch()));
+    m_operations.insert(m_netMan->get(ApiHelper::atomGetRequest(m_accessToken, m_id, params)), refreshOP);
 }
 
 void Subscription::fetchMore()
 {
-    QString url = QString("https://www.google.com/reader/atom/%0?n=%1&ck=%2")
-                  .arg(m_id).arg(QString::number(20)).arg(QDateTime::currentMSecsSinceEpoch());
+    QMap<QString, QString> params;
+    params.insert("n", "20");
+    params.insert("ck", QString::number(QDateTime::currentMSecsSinceEpoch()));
     QString continuationToken = getContinuationToken();
     if(!continuationToken.isEmpty()) {
-        url.append(QString("&c=%0").arg(continuationToken));
+        params.insert("c", continuationToken);
     }
-    QNetworkRequest r(url);
-    r.setRawHeader("Authorization", QString("OAuth %0").arg(m_accessToken).toUtf8());
-    m_operations.insert(m_netMan->get(r), getMoreOP);
+    m_operations.insert(m_netMan->get(ApiHelper::atomGetRequest(m_accessToken, m_id, params)), getMoreOP);
 }
 
 void Subscription::replyFinshed(QNetworkReply* reply)

@@ -25,6 +25,7 @@
 #include <QJsonDocument>
 
 #include "upreader.h"
+#include "apihelper.h"
 #include <QtCore/qdatetime.h>
 
 Auth::Auth(QObject* parent)
@@ -64,9 +65,7 @@ void Auth::authReceived(QString token)
     QString params = QString("client_id=%0&client_secret=%1&grant_type=authorization_code&redirect_uri=urn:ietf:wg:oauth:2.0:oob&code=%2")
                      .arg("444103914762.apps.googleusercontent.com")
                      .arg("ElXjwd-komrQeunn6OM80HrB").arg(token);
-    QNetworkRequest r = QNetworkRequest(QUrl("https://accounts.google.com/o/oauth2/token"));
-    r.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
-    m_operations.insert(m_netMan->post(r, params.toUtf8()), authOP);
+    m_operations.insert(m_netMan->post(ApiHelper::acquireAccessToken(), params.toUtf8()), authOP);
 }
 
 void Auth::getNewAccessToken()
@@ -74,9 +73,7 @@ void Auth::getNewAccessToken()
     QString params = QString("client_id=%0&client_secret=%1&grant_type=refresh_token&refresh_token=%2")
                      .arg("444103914762.apps.googleusercontent.com")
                      .arg("ElXjwd-komrQeunn6OM80HrB").arg(m_refreshToken);
-    QNetworkRequest r = QNetworkRequest(QUrl("https://accounts.google.com/o/oauth2/token"));
-    r.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
-    m_operations.insert(m_netMan->post(r, params.toUtf8()), refreshOP);
+    m_operations.insert(m_netMan->post(ApiHelper::acquireAccessToken(), params.toUtf8()), refreshOP);
 }
 
 void Auth::replyFinshed(QNetworkReply* reply)

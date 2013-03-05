@@ -21,6 +21,7 @@
 #include <QJsonDocument>
 
 #include "manager.h"
+#include "apihelper.h"
 #include "sqlhelper.h"
 
 Manager::Manager(QObject* parent)
@@ -62,9 +63,7 @@ void Manager::refreshSubscriptions()
     foreach (QNetworkReply* reply, m_operations.keys()) {
         reply->abort();
     }
-    QNetworkRequest r(QUrl("https://www.google.com/reader/api/0/subscription/list?output=json"));
-    r.setRawHeader("Authorization", QString("OAuth %0").arg(m_accessToken).toUtf8());
-    m_operations.insert(m_netMan->get(r), listOP);
+    m_operations.insert(m_netMan->get(ApiHelper::getSubscriptionList(m_accessToken)), listOP);
 }
 
 void Manager::replyFinshed(QNetworkReply* reply)
@@ -84,9 +83,11 @@ void Manager::replyFinshed(QNetworkReply* reply)
 void Manager::syncSubscriptions()
 {
     QString google_id = SqlHelper::firstSubToUpdate();
-    Subscription *s = new Subscription(m_accessToken, google_id, this);
-    connect(s, SIGNAL(updated(Subscription*)), this, SLOT(subUpdated(Subscription*)));
-    s->refresh();
+    if (!google_id.isEmpty()) {
+        Subscription *s = new Subscription(m_accessToken, google_id, this);
+        connect(s, SIGNAL(updated(Subscription*)), this, SLOT(subUpdated(Subscription*)));
+        s->refresh();
+    }
 }
 
 void Manager::subUpdated(Subscription *sub)
