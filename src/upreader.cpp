@@ -18,7 +18,7 @@
 */
 
 #include <QtNetwork/QNetworkCookieJar>
-#include <QtNetwork/QNetworkAccessManager>
+#include <QtCore/qdatetime.h>
 #include <QNetworkRequest>
 #include <QtCore/QDebug>
 #include <QtCore/QSettings>
@@ -26,13 +26,13 @@
 
 #include "upreader.h"
 #include "apihelper.h"
-#include <QtCore/qdatetime.h>
+#include "networkmanager.h"
 
 Auth::Auth(QObject* parent)
     : QObject(parent)
 {
-    m_netMan = new QNetworkAccessManager(this);
-    connect(m_netMan, SIGNAL(finished(QNetworkReply*)), this, SLOT(replyFinshed(QNetworkReply*)));
+    m_netMan = new NetworkManager(this);
+    connect(m_netMan, SIGNAL(requestComplete(QNetworkReply*)), this, SLOT(replyFinshed(QNetworkReply*)));
 }
 
 Auth::~Auth()
@@ -101,7 +101,6 @@ void Auth::replyFinshed(QNetworkReply* reply)
         break;
     }
     }
-    reply->deleteLater();
 }
 
 #include "upreader.moc"

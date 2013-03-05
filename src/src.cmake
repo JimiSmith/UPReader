@@ -11,6 +11,7 @@ set(upreader_src src/filteredfeedmodel.cpp
                  src/main.cpp
                  src/apihelper.cpp
                  src/sqlhelper.cpp
+                 src/networkmanager.cpp
                  src/qmlsqltablemodel.cpp
                  src/qmlsqlquerymodel.cpp)
 

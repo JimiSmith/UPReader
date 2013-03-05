@@ -23,13 +23,14 @@
 #include "manager.h"
 #include "apihelper.h"
 #include "sqlhelper.h"
+#include "networkmanager.h"
 
 Manager::Manager(QObject* parent)
     : QObject(parent)
 {
-    m_netMan = new QNetworkAccessManager(this);
+    m_netMan = new NetworkManager(this);
     connect(&m_watcher, SIGNAL(finished()), this, SIGNAL(updateSubList()));
-    connect(m_netMan, SIGNAL(finished(QNetworkReply*)), this, SLOT(replyFinshed(QNetworkReply*)));
+    connect(m_netMan, SIGNAL(requestComplete(QNetworkReply*)), this, SLOT(replyFinshed(QNetworkReply*)));
 }
 
 Manager::~Manager()
@@ -60,10 +61,8 @@ void Manager::refreshSubscriptions()
     disconnect(&m_watcher, SIGNAL(finished()), this, SLOT(refreshSubscriptions()));
     connect(&m_watcher, SIGNAL(finished()), this, SLOT(syncSubscriptions()));
     // cancel all running operations
-    foreach (QNetworkReply* reply, m_operations.keys()) {
-        reply->abort();
-    }
-    m_operations.insert(m_netMan->get(ApiHelper::getSubscriptionList(m_accessToken)), listOP);
+
+    m_netMan->get(ApiHelper::getSubscriptionList(m_accessToken));
 }
 
 void Manager::replyFinshed(QNetworkReply* reply)
@@ -71,13 +70,10 @@ void Manager::replyFinshed(QNetworkReply* reply)
     QByteArray json = reply->readAll();
     QJsonDocument sd = QJsonDocument::fromJson(json);
     QVariant result = sd.toVariant();
-    switch(m_operations.value(reply)) {
-    case listOP: {
-        QVariantList subList = result.toMap().value("subscriptions").toList();
-        QFuture<bool> subAddFuture = QtConcurrent::run(SqlHelper::addOrUpdateSubBatch, subList);
-        m_watcher.setFuture(subAddFuture);
-    }
-    }
+
+    QVariantList subList = result.toMap().value("subscriptions").toList();
+    QFuture<bool> subAddFuture = QtConcurrent::run(SqlHelper::addOrUpdateSubBatch, subList);
+    m_watcher.setFuture(subAddFuture);
 }
 
 void Manager::syncSubscriptions()

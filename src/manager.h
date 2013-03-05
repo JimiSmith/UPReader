@@ -22,17 +22,17 @@
 #define MANAGER_H
 
 #include <QtCore/QObject>
-#include <QtNetwork/QNetworkAccessManager>
 #include <QtNetwork/QNetworkReply>
 #include <QtCore/QMap>
 #include <QtConcurrent>
 
 #include "subscription.h"
 
+class NetworkManager;
+
 class Manager : public QObject
 {
     Q_OBJECT
-    enum opType { listOP };
 public:
     explicit Manager(QObject* parent = 0);
     virtual ~Manager();
@@ -43,8 +43,7 @@ public:
     void refreshSubList();
 
 private:
-    QNetworkAccessManager* m_netMan;
-    QMap<QNetworkReply*, opType> m_operations;
+    NetworkManager* m_netMan;
     QString m_accessToken;
     QString m_refreshToken;
     QFutureWatcher<bool> m_watcher;

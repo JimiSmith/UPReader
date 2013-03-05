@@ -23,20 +23,19 @@
 
 #include <QtCore/QObject>
 #include <QtCore/QStringList>
-#include <QtNetwork/QNetworkAccessManager>
 #include <QtNetwork/QNetworkReply>
 #include <QtNetwork/QNetworkRequest>
 
 #include "feedparser.h"
 
 class ArticleList;
+class NetworkManager;
 
 class Subscription : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(QString title READ getTitle NOTIFY updated)
     Q_PROPERTY(int id READ getDBId NOTIFY updated)
-    enum opType { refreshOP, getMoreOP };
     struct StoryContent {
         QString title;
         QString author;
@@ -58,8 +57,7 @@ private:
     QString m_accessToken;
     QString m_atomText;
     QString m_id;
-    QNetworkAccessManager* m_netMan;
-    QMap<QNetworkReply*, opType> m_operations;
+    NetworkManager* m_netMan;
     FeedParser* m_parser;
 
 public slots:

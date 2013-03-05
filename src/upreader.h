@@ -25,6 +25,8 @@
 #include <QtNetwork/QNetworkCookie>
 #include <QtNetwork/QNetworkReply>
 
+class NetworkManager;
+
 class Auth : public QObject
 {
     Q_OBJECT
@@ -49,7 +51,7 @@ public slots:
 private:
     void getNewAccessToken();
 
-    QNetworkAccessManager* m_netMan;
+    NetworkManager* m_netMan;
     QMap<QNetworkReply*, opType> m_operations;
     QString m_accessToken;
     QString m_refreshToken;

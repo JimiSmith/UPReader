@@ -25,6 +25,7 @@
 #include "articlelist.h"
 #include "apihelper.h"
 #include "sqlhelper.h"
+#include "networkmanager.h"
 
 Subscription::Subscription()
 {
@@ -36,10 +37,10 @@ Subscription::Subscription(QString token, QString id, QObject* parent)
 {
     m_accessToken = token;
     m_id = id;
-    m_netMan = new QNetworkAccessManager(this);
+    m_netMan = new NetworkManager(this);
     m_parser = new FeedParser();
     connect(m_parser, SIGNAL(doneParsing()), this, SLOT(parsingComplete()));
-    connect(m_netMan, SIGNAL(finished(QNetworkReply*)), this, SLOT(replyFinshed(QNetworkReply*)));
+    connect(m_netMan, SIGNAL(requestComplete(QNetworkReply*)), this, SLOT(replyFinshed(QNetworkReply*)));
 }
 
 Subscription::~Subscription()
@@ -75,7 +76,7 @@ void Subscription::refresh()
     QMap<QString, QString> params;
     params.insert("n", "20");
     params.insert("ck", QString::number(QDateTime::currentMSecsSinceEpoch()));
-    m_operations.insert(m_netMan->get(ApiHelper::atomGetRequest(m_accessToken, m_id, params)), refreshOP);
+    m_netMan->get(ApiHelper::atomGetRequest(m_accessToken, m_id, params));
 }
 
 void Subscription::fetchMore()
@@ -87,27 +88,21 @@ void Subscription::fetchMore()
     if(!continuationToken.isEmpty()) {
         params.insert("c", continuationToken);
     }
-    m_operations.insert(m_netMan->get(ApiHelper::atomGetRequest(m_accessToken, m_id, params)), getMoreOP);
+    m_netMan->get(ApiHelper::atomGetRequest(m_accessToken, m_id, params));
 }
 
 void Subscription::replyFinshed(QNetworkReply* reply)
 {
-    QUrl possibleRedirectUrl = reply->attribute(QNetworkRequest::RedirectionTargetAttribute).toUrl();
-    if(!possibleRedirectUrl.isEmpty()) { //we're being redirected
-        m_netMan->get(QNetworkRequest(possibleRedirectUrl));
-    } else { //we're at the endpoint
-        m_atomText = QString::fromUtf8(reply->readAll());
-        m_parser->setFeedString(m_atomText);
-        m_parser->setFeedId(m_id);
-        QThread *workerThread = new QThread(this);
+    m_atomText = QString::fromUtf8(reply->readAll());
+    m_parser->setFeedString(m_atomText);
+    m_parser->setFeedId(m_id);
+    QThread *workerThread = new QThread(this);
 
-        connect(workerThread, &QThread::started, m_parser, &FeedParser::beginParsing);
-        connect(workerThread, &QThread::finished, workerThread, &QObject::deleteLater);
-        m_parser->moveToThread(workerThread);
+    connect(workerThread, &QThread::started, m_parser, &FeedParser::beginParsing);
+    connect(workerThread, &QThread::finished, workerThread, &QObject::deleteLater);
+    m_parser->moveToThread(workerThread);
 
-        workerThread->start();
-    }
-    reply->deleteLater();
+    workerThread->start();
 }
 
 void Subscription::parsingComplete()
