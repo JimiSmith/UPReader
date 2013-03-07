@@ -56,7 +56,7 @@ Page {
                 pageStack.push(Qt.resolvedUrl('ArticleView.qml'), {article: contentModel.getArticle(index)})
             }
             UbuntuShape {
-                color: unread ? '#DD4814' : '#AEA79F'
+                color: read ? '#AEA79F' : '#DD4814'
                 width: units.gu(1)
                 height: units.gu(1)
                 anchors {

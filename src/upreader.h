@@ -52,12 +52,8 @@ private:
     void getNewAccessToken();
 
     NetworkManager* m_netMan;
-    QMap<QNetworkReply*, opType> m_operations;
     QString m_accessToken;
     QString m_refreshToken;
-
-private slots:
-    void replyFinshed(QNetworkReply* reply);
 
 signals:
     void showWebView(QUrl authUrl);

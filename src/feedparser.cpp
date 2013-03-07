@@ -20,7 +20,6 @@
 #include <QtCore/QDebug>
 
 #include "feedparser.h"
-#include "articlelist.h"
 #include "article.h"
 #include "sqlhelper.h"
 
@@ -115,7 +114,7 @@ void FeedParser::parseFeed()
 //                map->setContinuationToken(e.text());
             } else if(e.tagName() == "entry") { //next is the entry element
                 QVariantMap entry = parseEntry(e, id);
-                if (entry.value("unread", 0).toInt()) {
+                if (entry.value("read", 0).toInt() == 0) {
                     unread++;
                 }
                 entryList.append(entry);
@@ -131,7 +130,7 @@ QVariantMap FeedParser::parseEntry(QDomElement entry, int id)
 {
     QVariantMap data;
     QStringList states;
-    bool unread = false;
+    bool read = false;
     QDomNodeList l = entry.childNodes();
     for(int i = 0; i < l.length(); ++i) {
         QDomNode n = l.at(i);
@@ -181,9 +180,9 @@ QVariantMap FeedParser::parseEntry(QDomElement entry, int id)
             }
         }
     }
-    unread = !states.contains("read");
+    read = states.contains("read");
 
-    data.insert("unread", unread);
+    data.insert("read", read);
     data.insert("subscription_id", id);
 
     return data;

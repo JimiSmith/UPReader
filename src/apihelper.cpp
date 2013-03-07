@@ -59,3 +59,12 @@ QNetworkRequest ApiHelper::acquireAccessToken()
 {
     return accountsPostRequest("oauth2/token");
 }
+
+QNetworkRequest ApiHelper::markArticleRead(QString accessToken, QString id)
+{
+    QMap<QString, QString> params;
+    params.insert("output", "json");
+    params.insert("i", id);
+    params.insert("r", "user/-/com.google/read");
+    return apiGetRequest(accessToken, "edit-tag", params);
+}

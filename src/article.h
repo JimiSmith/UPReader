@@ -32,7 +32,7 @@ class Article : public QObject
     Q_PROPERTY(QString content READ content NOTIFY updated)
     Q_PROPERTY(QString summary READ summary NOTIFY updated)
     Q_PROPERTY(QString title READ title NOTIFY updated)
-    Q_PROPERTY(bool unread READ unread NOTIFY updated)
+    Q_PROPERTY(bool read READ read WRITE setRead NOTIFY updated)
     Q_PROPERTY(QString articleDomainName READ articleDomainName NOTIFY updated)
 public:
     static Article* fromRecord(QSqlRecord record);
@@ -74,7 +74,8 @@ public:
 
     QString summary() const;
 
-    bool unread() const;
+    bool read() const;
+    void setRead(const bool read);
 
 private:
     QStringList m_state;

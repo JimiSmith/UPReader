@@ -25,7 +25,6 @@
 
 #include "contentmodel.h"
 #include "article.h"
-#include "articlelist.h"
 
 ContentModel::ContentModel(QObject* parent)
     : QmlSqlTableModel(parent)

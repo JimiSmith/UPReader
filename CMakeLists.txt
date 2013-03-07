@@ -14,6 +14,8 @@ set(CMAKE_AUTOMOC ON)
   # to always look for includes there:
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
+add_definitions(-std=c++11)
+
 include_directories(
         ${CMAKE_SOURCE_DIR}
         ${CMAKE_BINARY_DIR}

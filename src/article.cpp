@@ -159,7 +159,7 @@ QString Article::summary() const
     return m_summary;
 }
 
-bool Article::unread() const
+bool Article::read() const
 {
     return m_state.contains("read");
 }
@@ -174,4 +174,9 @@ Article *Article::fromRecord(QSqlRecord record)
     article->setTitle(record.value("title").toString());
     article->setArticleDomainName(record.value("article_domain_name").toString());
     return article;
+}
+
+
+void Article::setRead(const bool read)
+{
 }

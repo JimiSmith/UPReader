@@ -60,12 +60,13 @@ private:
     NetworkManager* m_netMan;
     FeedParser* m_parser;
 
+    void handleNetworkReply(QNetworkReply* reply);
+
 public slots:
     void fetchMore();
     void refresh();
 
 private slots:
-    void replyFinshed(QNetworkReply* reply);
     void parsingComplete();
 
 signals:

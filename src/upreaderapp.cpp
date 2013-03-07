@@ -130,7 +130,7 @@ void UPReaderApp::setupDB()
         articleValues.append("published text");
         articleValues.append("updated text");
         articleValues.append("author text");
-        articleValues.append("unread integer");
+        articleValues.append("read integer");
         articleValues.append("article_domain_name text");
         articleValues.append("google_id text");
         SqlHelper::createTableIfNeeded(QString("articles"), articleValues);

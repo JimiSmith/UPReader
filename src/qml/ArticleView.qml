@@ -37,6 +37,10 @@ Page {
     }
 
     title: article.title
+
+    Component.onCompleted: {
+        article.read = true;
+    }
     
     WebView {
         id: webView

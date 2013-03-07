@@ -11,6 +11,7 @@ public:
     static QNetworkRequest atomGetRequest(QString accessToken, QString id, QMap<QString, QString> queryParams);
     static QNetworkRequest getSubscriptionList(QString accessToken);
     static QNetworkRequest acquireAccessToken();
+    static QNetworkRequest markArticleRead(QString accessToken, QString id);
 private:
     static QNetworkRequest accountsPostRequest(QString endpoint);
     static QNetworkRequest apiGetRequest(QString accessToken, QString endpoint, QMap<QString, QString> queryParams);

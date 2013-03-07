@@ -175,11 +175,11 @@ bool SqlHelper::addOrUpdateArticle(QVariantMap articleData)
         dataQuery.prepare("UPDATE articles SET title=:title, link=:link, "
                           "published=:published, updated=:updated, "
                           "article_domain_name=:article_domain_name, author=:author, "
-                          "content=:content, unread=:unread, subscription_id=:subscription_id "
+                          "content=:content, read=:read, subscription_id=:subscription_id "
                           "WHERE google_id=:google_id");
     } else {
-        dataQuery.prepare("INSERT INTO articles (google_id, title, link, published, updated, article_domain_name, author, content, unread, subscription_id) "
-                          "VALUES (:google_id, :title, :link, :published, :updated, :article_domain_name, :author, :content, :unread, :subscription_id)");
+        dataQuery.prepare("INSERT INTO articles (google_id, title, link, published, updated, article_domain_name, author, content, read, subscription_id) "
+                          "VALUES (:google_id, :title, :link, :published, :updated, :article_domain_name, :author, :content, :read, :subscription_id)");
     }
 
     dataQuery.bindValue(":google_id", google_id);
@@ -190,7 +190,7 @@ bool SqlHelper::addOrUpdateArticle(QVariantMap articleData)
     dataQuery.bindValue(":article_domain_name", articleData.value("article_domain_name", ""));
     dataQuery.bindValue(":author", articleData.value("author", ""));
     dataQuery.bindValue(":content", articleData.value("content", ""));
-    dataQuery.bindValue(":unread", articleData.value("unread", 0));
+    dataQuery.bindValue(":read", articleData.value("read", 1));
     dataQuery.bindValue(":subscription_id", articleData.value("subscription_id", 1));
 
     bool dataRet = dataQuery.exec();

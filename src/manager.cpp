@@ -30,7 +30,6 @@ Manager::Manager(QObject* parent)
 {
     m_netMan = new NetworkManager(this);
     connect(&m_watcher, SIGNAL(finished()), this, SIGNAL(updateSubList()));
-    connect(m_netMan, SIGNAL(requestComplete(QNetworkReply*)), this, SLOT(replyFinshed(QNetworkReply*)));
 }
 
 Manager::~Manager()
@@ -62,10 +61,12 @@ void Manager::refreshSubscriptions()
     connect(&m_watcher, SIGNAL(finished()), this, SLOT(syncSubscriptions()));
     // cancel all running operations
 
-    m_netMan->get(ApiHelper::getSubscriptionList(m_accessToken));
+    m_netMan->get(ApiHelper::getSubscriptionList(m_accessToken), [this](QNetworkReply *reply) {
+        handleNetworkReply(reply);
+    });
 }
 
-void Manager::replyFinshed(QNetworkReply* reply)
+void Manager::handleNetworkReply(QNetworkReply* reply)
 {
     QByteArray json = reply->readAll();
     QJsonDocument sd = QJsonDocument::fromJson(json);

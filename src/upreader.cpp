@@ -32,7 +32,6 @@ Auth::Auth(QObject* parent)
     : QObject(parent)
 {
     m_netMan = new NetworkManager(this);
-    connect(m_netMan, SIGNAL(requestComplete(QNetworkReply*)), this, SLOT(replyFinshed(QNetworkReply*)));
 }
 
 Auth::~Auth()
@@ -65,24 +64,10 @@ void Auth::authReceived(QString token)
     QString params = QString("client_id=%0&client_secret=%1&grant_type=authorization_code&redirect_uri=urn:ietf:wg:oauth:2.0:oob&code=%2")
                      .arg("444103914762.apps.googleusercontent.com")
                      .arg("ElXjwd-komrQeunn6OM80HrB").arg(token);
-    m_operations.insert(m_netMan->post(ApiHelper::acquireAccessToken(), params.toUtf8()), authOP);
-}
-
-void Auth::getNewAccessToken()
-{
-    QString params = QString("client_id=%0&client_secret=%1&grant_type=refresh_token&refresh_token=%2")
-                     .arg("444103914762.apps.googleusercontent.com")
-                     .arg("ElXjwd-komrQeunn6OM80HrB").arg(m_refreshToken);
-    m_operations.insert(m_netMan->post(ApiHelper::acquireAccessToken(), params.toUtf8()), refreshOP);
-}
-
-void Auth::replyFinshed(QNetworkReply* reply)
-{
-    QByteArray json = reply->readAll();
-    QJsonDocument sd = QJsonDocument::fromJson(json);
-    QVariant result = sd.toVariant();
-    switch(m_operations.value(reply)) {
-    case authOP: {
+    m_netMan->post(ApiHelper::acquireAccessToken(), params.toUtf8(), [this](QNetworkReply *reply) {
+        QByteArray json = reply->readAll();
+        QJsonDocument sd = QJsonDocument::fromJson(json);
+        QVariant result = sd.toVariant();
         QVariantMap m = result.toMap();
         m_refreshToken = m.value("refresh_token").toString();
         m_accessToken = m.value("access_token").toString();
@@ -92,15 +77,23 @@ void Auth::replyFinshed(QNetworkReply* reply)
         settings.setValue("refreshtoken", m_refreshToken);
         settings.endGroup();
         emit haveAccessToken();
-        break;
-    }
-    case refreshOP: {
+    });
+}
+
+void Auth::getNewAccessToken()
+{
+    QString params = QString("client_id=%0&client_secret=%1&grant_type=refresh_token&refresh_token=%2")
+                     .arg("444103914762.apps.googleusercontent.com")
+                     .arg("ElXjwd-komrQeunn6OM80HrB").arg(m_refreshToken);
+    m_netMan->post(ApiHelper::acquireAccessToken(), params.toUtf8(), [this](QNetworkReply *reply) {
+        QByteArray json = reply->readAll();
+        QJsonDocument sd = QJsonDocument::fromJson(json);
+        QVariant result = sd.toVariant();
+
         QVariantMap m = result.toMap();
         m_accessToken = m.value("access_token").toString();
         emit haveAccessToken();
-        break;
-    }
-    }
+    });
 }
 
 #include "upreader.moc"

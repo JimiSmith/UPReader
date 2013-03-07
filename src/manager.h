@@ -47,9 +47,9 @@ private:
     QString m_accessToken;
     QString m_refreshToken;
     QFutureWatcher<bool> m_watcher;
+    void handleNetworkReply(QNetworkReply* reply);
 
 private slots:
-    void replyFinshed(QNetworkReply* reply);
     void subUpdated(Subscription *sub);
     void syncSubscriptions();
     void refreshSubscriptions();

@@ -1,3 +1,5 @@
+#include <QDebug>
+
 #include "networkmanager.h"
 
 NetworkManager::NetworkManager(QObject *parent) :
@@ -5,6 +7,16 @@ NetworkManager::NetworkManager(QObject *parent) :
     m_netMan(new QNetworkAccessManager(this))
 {
     connect(m_netMan, SIGNAL(finished(QNetworkReply*)), this, SLOT(replyFinished(QNetworkReply*)));
+}
+
+void NetworkManager::post(QNetworkRequest request, QByteArray body, std::function<void (QNetworkReply *)> complete)
+{
+    m_operations.insert(post(request, body), complete);
+}
+
+void NetworkManager::get(QNetworkRequest request, std::function<void (QNetworkReply *)> complete)
+{
+    m_operations.insert(get(request), complete);
 }
 
 QNetworkReply* NetworkManager::post(QNetworkRequest request, QByteArray body)
@@ -23,7 +35,13 @@ void NetworkManager::replyFinished(QNetworkReply *reply)
     if(!possibleRedirectUrl.isEmpty()) { //we're being redirected
         m_netMan->get(QNetworkRequest(possibleRedirectUrl));
     } else { //we're at the endpoint
-        emit requestComplete(reply);
+        auto func = m_operations.value(reply);
+        if (func) {
+            func(reply);
+            m_operations.remove(reply);
+        } else {
+            emit requestComplete(reply);
+        }
     }
     reply->deleteLater();
 }

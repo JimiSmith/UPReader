@@ -22,7 +22,6 @@
 
 #include "subscription.h"
 #include "article.h"
-#include "articlelist.h"
 #include "apihelper.h"
 #include "sqlhelper.h"
 #include "networkmanager.h"
@@ -40,7 +39,6 @@ Subscription::Subscription(QString token, QString id, QObject* parent)
     m_netMan = new NetworkManager(this);
     m_parser = new FeedParser();
     connect(m_parser, SIGNAL(doneParsing()), this, SLOT(parsingComplete()));
-    connect(m_netMan, SIGNAL(requestComplete(QNetworkReply*)), this, SLOT(replyFinshed(QNetworkReply*)));
 }
 
 Subscription::~Subscription()
@@ -67,31 +65,7 @@ int Subscription::getDBId()
     return SqlHelper::subIdForGoogleId(m_id);
 }
 
-void Subscription::refresh()
-{
-    if (m_id.isEmpty()) {
-        qWarning() << "Can't refresh with an empty feed id";
-        return;
-    }
-    QMap<QString, QString> params;
-    params.insert("n", "20");
-    params.insert("ck", QString::number(QDateTime::currentMSecsSinceEpoch()));
-    m_netMan->get(ApiHelper::atomGetRequest(m_accessToken, m_id, params));
-}
-
-void Subscription::fetchMore()
-{
-    QMap<QString, QString> params;
-    params.insert("n", "20");
-    params.insert("ck", QString::number(QDateTime::currentMSecsSinceEpoch()));
-    QString continuationToken = getContinuationToken();
-    if(!continuationToken.isEmpty()) {
-        params.insert("c", continuationToken);
-    }
-    m_netMan->get(ApiHelper::atomGetRequest(m_accessToken, m_id, params));
-}
-
-void Subscription::replyFinshed(QNetworkReply* reply)
+void Subscription::handleNetworkReply(QNetworkReply *reply)
 {
     m_atomText = QString::fromUtf8(reply->readAll());
     m_parser->setFeedString(m_atomText);
@@ -104,6 +78,36 @@ void Subscription::replyFinshed(QNetworkReply* reply)
 
     workerThread->start();
 }
+
+void Subscription::refresh()
+{
+    if (m_id.isEmpty()) {
+        qWarning() << "Can't refresh with an empty feed id";
+        return;
+    }
+    QMap<QString, QString> params;
+    params.insert("n", "20");
+    params.insert("ck", QString::number(QDateTime::currentMSecsSinceEpoch()));
+    m_netMan->get(ApiHelper::atomGetRequest(m_accessToken, m_id, params), [this](QNetworkReply* reply) {
+        handleNetworkReply(reply);
+    });
+}
+
+void Subscription::fetchMore()
+{
+    QMap<QString, QString> params;
+    params.insert("n", "20");
+    params.insert("ck", QString::number(QDateTime::currentMSecsSinceEpoch()));
+    QString continuationToken = getContinuationToken();
+    if(!continuationToken.isEmpty()) {
+        params.insert("c", continuationToken);
+    }
+    m_netMan->get(ApiHelper::atomGetRequest(m_accessToken, m_id, params), [this](QNetworkReply* reply) {
+        handleNetworkReply(reply);
+    });
+}
+
+
 
 void Subscription::parsingComplete()
 {
