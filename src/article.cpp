@@ -22,10 +22,13 @@
 #include <QtGlobal>
 
 #include "article.h"
+#include "networkmanager.h"
+#include "apihelper.h"
 
 Article::Article(QObject* parent)
     : QObject(parent)
 {
+    m_netMan = new NetworkManager(this);
 }
 
 Article::~Article()
@@ -164,8 +167,42 @@ bool Article::read() const
     return m_state.contains("read");
 }
 
+void Article::markRead(const bool read)
+{
+    QMap<QString, QString> params;
+    params.insert("output", "json");
+    params.insert("async", "true");
+    params.insert("i", m_id);
+    params.insert("s", m_subscriptionId);
+    params.insert("a", "user/-/state/com.google/read");
+    params.insert("T", ApiHelper::getAccessToken());
+    qDebug() << "Marking read" << params;
+    m_netMan->post(ApiHelper::markArticleRead(), ApiHelper::getParamString(params).toLatin1(),
+                [this](QNetworkReply *reply) {
+        qDebug() << "Marked read" << reply->readAll();
+    });
+}
 
-Article *Article::fromRecord(QSqlRecord record)
+void Article::setRead(const bool r)
+{
+    if (r && !read()) {
+        m_state.append("read");
+    } else if (!r) {
+        m_state.removeAll("read");
+    }
+}
+
+QString Article::getId() const
+{
+    return m_id;
+}
+
+void Article::setId(const QString &id)
+{
+    m_id = id;
+}
+
+Article *Article::fromRecord(QSqlRecord record, QString subscription_id)
 {
     Article *article = new Article();
     article->setAuthor(record.value("author").toString());
@@ -173,10 +210,18 @@ Article *Article::fromRecord(QSqlRecord record)
     article->setLink(record.value("link").toString());
     article->setTitle(record.value("title").toString());
     article->setArticleDomainName(record.value("article_domain_name").toString());
+    article->setRead(record.value("read").toBool());
+    article->setId(record.value("google_id").toString());
+    article->setSubscriptionId(subscription_id);
     return article;
 }
 
-
-void Article::setRead(const bool read)
+QString Article::getSubscriptionId() const
 {
+    return m_subscriptionId;
+}
+
+void Article::setSubscriptionId(const QString &subscriptionId)
+{
+    m_subscriptionId = subscriptionId;
 }

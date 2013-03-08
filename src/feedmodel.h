@@ -32,30 +32,10 @@ class Subscription;
 class FeedModel : public QmlSqlTableModel
 {
     Q_OBJECT
-    Q_PROPERTY(QString accessToken READ getAccessToken WRITE setAccessToken)
-    Q_PROPERTY(QString refreshToken READ getRefreshToken WRITE setRefreshToken)
 public:
 
     FeedModel(QObject* parent = 0);
     virtual ~FeedModel();
-
-    void setAccessToken(QString token) {
-        m_accessToken = token;
-        if(!m_accessToken.isEmpty()) {
-            m_man->setAccessToken(m_accessToken);
-            m_man->refreshSubList();
-        }
-    }
-    QString getAccessToken() {
-        return m_accessToken;
-    }
-    void setRefreshToken(QString token) {
-        m_refreshToken = token;
-        m_man->setRefreshToken(m_refreshToken);
-    }
-    QString getRefreshToken() {
-        return m_refreshToken;
-    }
 
     Q_INVOKABLE void refresh();
 

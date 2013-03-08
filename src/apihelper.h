@@ -8,13 +8,16 @@
 class ApiHelper
 {
 public:
-    static QNetworkRequest atomGetRequest(QString accessToken, QString id, QMap<QString, QString> queryParams);
-    static QNetworkRequest getSubscriptionList(QString accessToken);
+    static QNetworkRequest atomGetRequest(QString id, QMap<QString, QString> queryParams);
+    static QNetworkRequest getSubscriptionList();
     static QNetworkRequest acquireAccessToken();
-    static QNetworkRequest markArticleRead(QString accessToken, QString id);
+    static QNetworkRequest markArticleRead();
+    static QString getParamString(QMap<QString, QString> queryParams);
+    static QString getAccessToken();
 private:
     static QNetworkRequest accountsPostRequest(QString endpoint);
-    static QNetworkRequest apiGetRequest(QString accessToken, QString endpoint, QMap<QString, QString> queryParams);
+    static QNetworkRequest apiGetRequest(QString endpoint, QMap<QString, QString> queryParams);
+    static QNetworkRequest apiPostRequest(QString endpoint);
     static QString appendParamsToUrl(QString url, QMap<QString, QString> queryParams);
 };
 

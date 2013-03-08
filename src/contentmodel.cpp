@@ -25,6 +25,7 @@
 
 #include "contentmodel.h"
 #include "article.h"
+#include "sqlhelper.h"
 
 ContentModel::ContentModel(QObject* parent)
     : QmlSqlTableModel(parent)
@@ -62,7 +63,7 @@ void ContentModel::itemsAppended(int i)
 
 Article* ContentModel::getArticle(int ind)
 {
-    return Article::fromRecord(record(ind));
+    return Article::fromRecord(record(ind), SqlHelper::googleIdForSub(m_subscription));
 }
 
 #include "contentmodel.moc"

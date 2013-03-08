@@ -37,15 +37,10 @@ public:
     explicit Manager(QObject* parent = 0);
     virtual ~Manager();
 
-    void setRefreshToken(QString refresh);
-    void setAccessToken(QString access);
-
     void refreshSubList();
 
 private:
     NetworkManager* m_netMan;
-    QString m_accessToken;
-    QString m_refreshToken;
     QFutureWatcher<bool> m_watcher;
     void handleNetworkReply(QNetworkReply* reply);
 

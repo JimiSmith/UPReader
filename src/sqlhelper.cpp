@@ -127,6 +127,19 @@ int SqlHelper::subIdForGoogleId(QString googleId)
     return id;
 }
 
+QString SqlHelper::googleIdForSub(int subId)
+{
+    QSqlQuery subQuery;
+    subQuery.prepare("SELECT google_id FROM subscriptions WHERE id=:id");
+    subQuery.bindValue(":id", subId);
+    QString id = "";
+    if (subQuery.exec() && subQuery.next()) {
+        id = subQuery.value(0).toString();
+    }
+
+    return id;
+}
+
 bool SqlHelper::updateUnreadCountForGoogleId(QString googleId, int unread)
 {
     QSqlQuery dataQuery;

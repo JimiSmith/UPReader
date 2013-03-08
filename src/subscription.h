@@ -44,8 +44,8 @@ class Subscription : public QObject
     };
 public:
     Subscription();
-    explicit Subscription(QString token, QString id, QObject* parent = 0);
-    explicit Subscription(QString token, int id, QObject* parent = 0);
+    explicit Subscription(QString id, QObject* parent = 0);
+//    explicit Subscription(int id, QObject* parent = 0);
     virtual ~Subscription();
 
     QString getTitle();
@@ -54,7 +54,6 @@ public:
     int getDBId();
 
 private:
-    QString m_accessToken;
     QString m_atomText;
     QString m_id;
     NetworkManager* m_netMan;

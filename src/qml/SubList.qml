@@ -27,8 +27,9 @@ Page {
 
     FeedModel {
         id: feedModel
-        accessToken: authObject.accessToken
-        refreshToken: authObject.refreshToken
+        Component.onCompleted: {
+            feedModel.refresh();
+        }
     }
 
     Connections {

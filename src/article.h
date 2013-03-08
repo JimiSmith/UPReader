@@ -26,16 +26,18 @@
 #include <QDate>
 #include <QSqlRecord>
 
+class NetworkManager;
+
 class Article : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(QString content READ content NOTIFY updated)
     Q_PROPERTY(QString summary READ summary NOTIFY updated)
     Q_PROPERTY(QString title READ title NOTIFY updated)
-    Q_PROPERTY(bool read READ read WRITE setRead NOTIFY updated)
+    Q_PROPERTY(bool read READ read WRITE markRead NOTIFY updated)
     Q_PROPERTY(QString articleDomainName READ articleDomainName NOTIFY updated)
 public:
-    static Article* fromRecord(QSqlRecord record);
+    static Article* fromRecord(QSqlRecord record, QString subscription_id);
 
     explicit Article(QObject* parent = 0);
     virtual ~Article();
@@ -75,7 +77,14 @@ public:
     QString summary() const;
 
     bool read() const;
+    void markRead(const bool read);
     void setRead(const bool read);
+
+    QString getId() const;
+    void setId(const QString &id);
+
+    QString getSubscriptionId() const;
+    void setSubscriptionId(const QString &subscriptionId);
 
 private:
     QStringList m_state;
@@ -87,8 +96,11 @@ private:
     QString m_contentType;
     QString m_content;
     QString m_summary;
+    QString m_id;
+    QString m_subscriptionId;
     QDateTime m_published;
     QDateTime m_updated;
+    NetworkManager *m_netMan;
 
 signals:
     void updated();

@@ -34,17 +34,6 @@ Manager::Manager(QObject* parent)
 
 Manager::~Manager()
 {
-
-}
-
-void Manager::setAccessToken(QString access)
-{
-    m_accessToken = access;
-}
-
-void Manager::setRefreshToken(QString refresh)
-{
-    m_refreshToken = refresh;
 }
 
 void Manager::refreshSubList()
@@ -61,7 +50,7 @@ void Manager::refreshSubscriptions()
     connect(&m_watcher, SIGNAL(finished()), this, SLOT(syncSubscriptions()));
     // cancel all running operations
 
-    m_netMan->get(ApiHelper::getSubscriptionList(m_accessToken), [this](QNetworkReply *reply) {
+    m_netMan->get(ApiHelper::getSubscriptionList(), [this](QNetworkReply *reply) {
         handleNetworkReply(reply);
     });
 }
@@ -81,7 +70,7 @@ void Manager::syncSubscriptions()
 {
     QString google_id = SqlHelper::firstSubToUpdate();
     if (!google_id.isEmpty()) {
-        Subscription *s = new Subscription(m_accessToken, google_id, this);
+        Subscription *s = new Subscription(google_id, this);
         connect(s, SIGNAL(updated(Subscription*)), this, SLOT(subUpdated(Subscription*)));
         s->refresh();
     }

@@ -10,6 +10,7 @@ public:
     static bool setAllSubsToLoadingState();
     static QString firstSubToUpdate();
     static int subIdForGoogleId(QString googleId);
+    static QString googleIdForSub(int subId);
     static bool updateUnreadCountForGoogleId(QString googleId, int unread);
 
     static bool addOrUpdateArticleBatch(QVariantList articleList);

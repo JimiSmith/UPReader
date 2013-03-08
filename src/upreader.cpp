@@ -75,6 +75,7 @@ void Auth::authReceived(QString token)
         //lets save the access token
         settings.beginGroup("auth");
         settings.setValue("refreshtoken", m_refreshToken);
+        settings.setValue("accesstoken", m_accessToken);
         settings.endGroup();
         emit haveAccessToken();
     });
