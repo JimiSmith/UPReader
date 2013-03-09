@@ -173,6 +173,7 @@ void Article::markRead(const bool read)
     QSettings settings("mrsmith", "upreader");
     settings.beginGroup("user");
     QString userId = settings.value("id").toString();
+    QString token = settings.value("token").toString();
     settings.endGroup();
     QMap<QString, QString> params;
     params.insert("output", "json");
@@ -180,7 +181,7 @@ void Article::markRead(const bool read)
     params.insert("i", m_id);
     params.insert("s", m_subscriptionId);
     params.insert("a", QString("user/%0/state/com.google/read").arg(userId));
-    //params.insert("T", ApiHelper::getAccessToken());
+    params.insert("T", token);
     qDebug() << "Marking read" << params;
     m_netMan->apiPost("edit-tag", params,
     [this](QNetworkReply *reply) {

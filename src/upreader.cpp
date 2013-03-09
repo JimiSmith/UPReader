@@ -79,6 +79,13 @@ void Auth::authReceived(QString token)
         settings.setValue("refreshtoken", m_refreshToken);
         settings.setValue("accesstoken", m_accessToken);
         settings.endGroup();
+        m_netMan->apiGet("token", QMap<QString, QString>(), [this](QNetworkReply *reply) {
+            QByteArray out = reply->readAll();
+            QSettings settings("mrsmith", "upreader");
+            settings.beginGroup("user");
+            settings.setValue("token", QString(out));
+            settings.endGroup();
+        });
         m_netMan->apiGet("user-info", QMap<QString, QString>(), [this](QNetworkReply *reply) {
             QByteArray json = reply->readAll();
             QJsonDocument sd = QJsonDocument::fromJson(json);
@@ -108,6 +115,13 @@ void Auth::getNewAccessToken()
 
         QVariantMap m = result.toMap();
         m_accessToken = m.value("access_token").toString();
+        m_netMan->apiGet("token", QMap<QString, QString>(), [this](QNetworkReply *reply) {
+            QByteArray out = reply->readAll();
+            QSettings settings("mrsmith", "upreader");
+            settings.beginGroup("user");
+            settings.setValue("token", QString(out));
+            settings.endGroup();
+        });
         emit haveAccessToken();
     });
 }
