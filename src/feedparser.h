@@ -47,6 +47,7 @@ private:
 
     QString m_atomText;
     QString m_id;
+    QString m_userId;
 
 public slots:
     void beginParsing();

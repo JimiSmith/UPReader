@@ -20,6 +20,7 @@
 #include <QtCore/QDebug>
 #include <QTextDocument>
 #include <QtGlobal>
+#include <QSettings>
 
 #include "article.h"
 #include "networkmanager.h"
@@ -169,16 +170,20 @@ bool Article::read() const
 
 void Article::markRead(const bool read)
 {
+    QSettings settings("mrsmith", "upreader");
+    settings.beginGroup("user");
+    QString userId = settings.value("id").toString();
+    settings.endGroup();
     QMap<QString, QString> params;
     params.insert("output", "json");
     params.insert("async", "true");
     params.insert("i", m_id);
     params.insert("s", m_subscriptionId);
-    params.insert("a", "user/-/state/com.google/read");
-    params.insert("T", ApiHelper::getAccessToken());
+    params.insert("a", QString("user/%0/state/com.google/read").arg(userId));
+    //params.insert("T", ApiHelper::getAccessToken());
     qDebug() << "Marking read" << params;
-    m_netMan->post(ApiHelper::markArticleRead(), ApiHelper::getParamString(params).toLatin1(),
-                [this](QNetworkReply *reply) {
+    m_netMan->apiPost("edit-tag", params,
+    [this](QNetworkReply *reply) {
         qDebug() << "Marked read" << reply->readAll();
     });
 }

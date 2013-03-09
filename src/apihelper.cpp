@@ -1,5 +1,6 @@
 #include <QDebug>
 #include <QSettings>
+#include <QDateTime>
 
 #include "apihelper.h"
 
@@ -8,6 +9,9 @@ QString ApiHelper::appendParamsToUrl(QString url, QMap<QString, QString> queryPa
     QString newUrl = QString(url);
     if (queryParams.size() > 0) {
         newUrl.append(QString("?%0").arg(getParamString(queryParams)));
+        newUrl.append("&output=json");
+    } else {
+        newUrl.append("?output=json");
     }
     return newUrl;
 }
@@ -62,23 +66,6 @@ QNetworkRequest ApiHelper::atomGetRequest(QString id, QMap<QString, QString> que
     r.setRawHeader("Authorization", QString("OAuth %0").arg(getAccessToken()).toUtf8());
 
     return r;
-}
-
-QNetworkRequest ApiHelper::getSubscriptionList()
-{
-    QMap<QString, QString> params;
-    params.insert("output", "json");
-    return apiGetRequest("subscription/list", params);
-}
-
-QNetworkRequest ApiHelper::acquireAccessToken()
-{
-    return accountsPostRequest("oauth2/token");
-}
-
-QNetworkRequest ApiHelper::markArticleRead()
-{
-    return apiPostRequest("edit-tag");
 }
 
 QString ApiHelper::getParamString(QMap<QString, QString> queryParams)

@@ -213,5 +213,68 @@ bool SqlHelper::addOrUpdateArticle(QVariantMap articleData)
         return false;
     }
 
-    return true;
+    return updateStateListForArticle(google_id, articleData.value("states").toStringList());
+}
+
+bool SqlHelper::updateStateListForArticle(QString googleId, QStringList states)
+{
+    bool result = true;
+
+    foreach (QString state, states) {
+        result = result && addStateToArticle(googleId, state);
+    }
+
+    return result;
+}
+
+bool SqlHelper::ensureStateForName(QString name)
+{
+    QSqlQuery stateQuery;
+    stateQuery.prepare("SELECT count(id) FROM states WHERE name=:name");
+    stateQuery.bindValue(":name", name);
+    if (stateQuery.exec() && stateQuery.next()) {
+        int count = stateQuery.value(0).toInt();
+
+        if (count == 0) {
+            QSqlQuery createState;
+            createState.prepare("INSERT INTO states (name) VALUES (:name)");
+            createState.bindValue(":name", name);
+            return createState.exec();
+        }
+        return true;
+    }
+
+    return false;
+}
+
+bool SqlHelper::addStateToArticle(QString googleId, QString state)
+{
+    if (!ensureStateForName(state)) {
+        return false;
+    }
+
+    QSqlQuery existsQuery;
+    existsQuery.prepare("SELECT count(ss.article_id) "
+                        "FROM article_states ss "
+                        "JOIN articles a ON a.id=ss.article_id AND a.google_id=:google_id "
+                        "JOIN states s ON s.id=ss.state_id AND s.name=:name");
+    existsQuery.bindValue(":google_id", googleId);
+    existsQuery.bindValue(":name", state);
+    if (existsQuery.exec() && existsQuery.next()) {
+        int count = existsQuery.value(0).toInt();
+        if (count == 0) {
+            QSqlQuery insertQuery;
+            insertQuery.prepare("INSERT INTO article_states (article_id, state_id) "
+                                "SELECT a.id, s.id FROM articles as a JOIN states as s "
+                                "ON a.google_id=:google_id AND s.name=:name");
+            insertQuery.bindValue(":google_id", googleId);
+            insertQuery.bindValue(":name", state);
+
+            return insertQuery.exec();
+        }
+
+        return true;
+    }
+
+    return false;
 }

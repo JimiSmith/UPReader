@@ -15,6 +15,11 @@ public:
 
     static bool addOrUpdateArticleBatch(QVariantList articleList);
     static bool addOrUpdateArticle(QVariantMap articleData);
+    static bool updateStateListForArticle(QString googleId, QStringList states);
+    static bool addStateToArticle(QString googleId, QString state);
+
+private:
+    static bool ensureStateForName(QString name);
 };
 
 #endif // SQLHELPER_H

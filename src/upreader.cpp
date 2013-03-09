@@ -55,16 +55,18 @@ void Auth::getAuth()
 
 void Auth::authReceived(QString token)
 {
-    qDebug() << "Getting AUTH";
     //once we have the token we need to post to https://accounts.google.com/o/oauth2/token
     //with the following params
     //client_id
     //client_secret
     //grant_type=authorization_code
-    QString params = QString("client_id=%0&client_secret=%1&grant_type=authorization_code&redirect_uri=urn:ietf:wg:oauth:2.0:oob&code=%2")
-                     .arg("444103914762.apps.googleusercontent.com")
-                     .arg("ElXjwd-komrQeunn6OM80HrB").arg(token);
-    m_netMan->post(ApiHelper::acquireAccessToken(), params.toUtf8(), [this](QNetworkReply *reply) {
+    QMap<QString, QString> params;
+    params.insert("client_id", "444103914762.apps.googleusercontent.com");
+    params.insert("client_secret", "ElXjwd-komrQeunn6OM80HrB");
+    params.insert("grant_type", "authorization_code");
+    params.insert("redirect_uri", "urn:ietf:wg:oauth:2.0:oob");
+    params.insert("code", token);
+    m_netMan->accountPost("oauth2/token", params, [this](QNetworkReply *reply) {
         QByteArray json = reply->readAll();
         QJsonDocument sd = QJsonDocument::fromJson(json);
         QVariant result = sd.toVariant();
@@ -77,16 +79,29 @@ void Auth::authReceived(QString token)
         settings.setValue("refreshtoken", m_refreshToken);
         settings.setValue("accesstoken", m_accessToken);
         settings.endGroup();
-        emit haveAccessToken();
+        m_netMan->apiGet("user-info", QMap<QString, QString>(), [this](QNetworkReply *reply) {
+            QByteArray json = reply->readAll();
+            QJsonDocument sd = QJsonDocument::fromJson(json);
+            QVariant result = sd.toVariant();
+            QVariantMap m = result.toMap();
+            QString userId = m.value("userId").toString();
+            QSettings settings("mrsmith", "upreader");
+            settings.beginGroup("user");
+            settings.setValue("id", userId);
+            settings.endGroup();
+            emit haveAccessToken();
+        });
     });
 }
 
 void Auth::getNewAccessToken()
 {
-    QString params = QString("client_id=%0&client_secret=%1&grant_type=refresh_token&refresh_token=%2")
-                     .arg("444103914762.apps.googleusercontent.com")
-                     .arg("ElXjwd-komrQeunn6OM80HrB").arg(m_refreshToken);
-    m_netMan->post(ApiHelper::acquireAccessToken(), params.toUtf8(), [this](QNetworkReply *reply) {
+    QMap<QString, QString> params;
+    params.insert("client_id", "444103914762.apps.googleusercontent.com");
+    params.insert("client_secret", "ElXjwd-komrQeunn6OM80HrB");
+    params.insert("grant_type", "refresh_token");
+    params.insert("refresh_token", m_refreshToken);
+    m_netMan->accountPost("oauth2/token", params, [this](QNetworkReply *reply) {
         QByteArray json = reply->readAll();
         QJsonDocument sd = QJsonDocument::fromJson(json);
         QVariant result = sd.toVariant();

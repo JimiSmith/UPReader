@@ -87,7 +87,7 @@ void Subscription::refresh()
     QMap<QString, QString> params;
     params.insert("n", "20");
     params.insert("ck", QString::number(QDateTime::currentMSecsSinceEpoch()));
-    m_netMan->get(ApiHelper::atomGetRequest(m_id, params), [this](QNetworkReply* reply) {
+    m_netMan->atomGet(m_id, params, [this](QNetworkReply* reply) {
         handleNetworkReply(reply);
     });
 }
@@ -101,7 +101,7 @@ void Subscription::fetchMore()
     if(!continuationToken.isEmpty()) {
         params.insert("c", continuationToken);
     }
-    m_netMan->get(ApiHelper::atomGetRequest(m_id, params), [this](QNetworkReply* reply) {
+    m_netMan->atomGet(m_id, params, [this](QNetworkReply* reply) {
         handleNetworkReply(reply);
     });
 }

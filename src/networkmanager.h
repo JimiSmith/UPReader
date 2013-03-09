@@ -13,8 +13,10 @@ class NetworkManager : public QObject
     Q_OBJECT
 public:
     explicit NetworkManager(QObject *parent = 0);
-    void post(QNetworkRequest request, QByteArray body, std::function<void(QNetworkReply*)> complete);
-    void get(QNetworkRequest request, std::function<void(QNetworkReply*)> complete);
+    void apiPost(QString url, QMap<QString, QString> params, std::function<void(QNetworkReply*)> complete);
+    void apiGet(QString url, QMap<QString, QString>, std::function<void(QNetworkReply*)> complete);
+    void atomGet(QString id, QMap<QString, QString>, std::function<void(QNetworkReply*)> complete);
+    void accountPost(QString url, QMap<QString, QString> params, std::function<void(QNetworkReply*)> complete);
 
 signals:
     void requestComplete(QNetworkReply* reply);

@@ -50,7 +50,7 @@ void Manager::refreshSubscriptions()
     connect(&m_watcher, SIGNAL(finished()), this, SLOT(syncSubscriptions()));
     // cancel all running operations
 
-    m_netMan->get(ApiHelper::getSubscriptionList(), [this](QNetworkReply *reply) {
+    m_netMan->apiGet("subscription/list", QMap<QString, QString>(), [this](QNetworkReply *reply) {
         handleNetworkReply(reply);
     });
 }

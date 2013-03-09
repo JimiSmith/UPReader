@@ -112,28 +112,39 @@ void UPReaderApp::setupDB()
     if (m_appDB.isOpen()) {
         QStringList tableValues;
         tableValues.append("id integer primary key");
-        tableValues.append("title text");
+        tableValues.append("title text not null");
         tableValues.append("url text");
         tableValues.append("continuation text");
-        tableValues.append("google_id text");
+        tableValues.append("google_id text not null");
         tableValues.append("unread integer");
         tableValues.append("needs_update integer");
         SqlHelper::createTableIfNeeded(QString("subscriptions"), tableValues);
 
         QStringList articleValues;
         articleValues.append("id integer primary key");
-        articleValues.append("subscription_id integer");
-        articleValues.append("content text");
+        articleValues.append("subscription_id integer not null");
+        articleValues.append("content text not null");
         articleValues.append("summary text");
-        articleValues.append("title text");
+        articleValues.append("title text not null");
         articleValues.append("link text");
         articleValues.append("published text");
         articleValues.append("updated text");
         articleValues.append("author text");
         articleValues.append("read integer");
         articleValues.append("article_domain_name text");
-        articleValues.append("google_id text");
+        articleValues.append("google_id text not null");
         SqlHelper::createTableIfNeeded(QString("articles"), articleValues);
+
+        QStringList stateJoinValues;
+        stateJoinValues.append("article_id integer not null");
+        stateJoinValues.append("state_id integer not null");
+        SqlHelper::createTableIfNeeded(QString("article_states"), stateJoinValues);
+
+        QStringList stateValues;
+        stateValues.append("id integer primary key");
+        stateValues.append("name text not null");
+        SqlHelper::createTableIfNeeded(QString("states"), stateValues);
+
 
     } else {
         qWarning() << "DB not open";

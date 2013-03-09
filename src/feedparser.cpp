@@ -91,6 +91,10 @@ there are then a list of categories which hold the items state(unread/read) and 
 
 void FeedParser::parseFeed()
 {
+    QSettings settings("mrsmith", "upreader");
+    settings.beginGroup("user");
+    m_userId = settings.value("id").toString();
+    settings.endGroup();
     int id = SqlHelper::subIdForGoogleId(m_id);
 
     if (id < 0) {
@@ -137,12 +141,7 @@ QVariantMap FeedParser::parseEntry(QDomElement entry, int id)
         QDomElement e = n.toElement();
         if(!e.isNull()) {
             if(e.tagName() == "category") { //the category tag contains the read status
-                if(e.attribute("term").contains("/state/com.google/")) { //this will represent one of googles states(e.g. read)
-                    QString state = e.attribute("term").split("/").last();
-                    states.append(state);
-                } else { //tag name?
-                    states.append(e.attribute("term"));
-                }
+                states.append(e.attribute("term"));
             } else if(e.tagName() == "id") {
                 data.insert("google_id", e.text());
             } else if(e.tagName() == "title") {
@@ -180,10 +179,11 @@ QVariantMap FeedParser::parseEntry(QDomElement entry, int id)
             }
         }
     }
-    read = states.contains("read");
+    read = states.contains(QString("user/%0/state/com.google/read").arg(m_userId));
 
     data.insert("read", read);
     data.insert("subscription_id", id);
+    data.insert("states", states);
 
     return data;
 }
