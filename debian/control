@@ -1,0 +1,12 @@
+Source: up-reader
+Section: net
+Priority: optional
+Maintainer: Jimi Smith <smithj002@gmail.com>
+Build-Depends: cmake, build-essential, qtbase5-dev
+Homepage: http://github.com/JimiSmith/UPReader
+
+Package: up-reader
+Architecture: any
+Depends: qt-components-ubuntu, qtbase5, libqt5webkit5, libqt5webkit5-qmlwebkitplugin, libqt5concurrent5, libqt5quick5, libqt5sql5-sqlite, libqt5declarative5, libqt5network5
+Description: A Google Reader client for Ubuntu
+ A Google Reader client, primarily aimed at Ubuntu Phone

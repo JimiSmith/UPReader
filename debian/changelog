@@ -1,0 +1,11 @@
+up-reader (0.1.1-0ppa0) raring; urgency=low
+
+  * Fix the packaging
+
+ -- Jimi Smith <smithj002@gmail.com>  Sun, 10 Mar 2013 18:54:43 +0200
+
+up-reader (0.1-0ppa0) oneiric; urgency=low
+
+  * Initial upload!
+
+ -- Jimi Smith <smithj002@gmail.com>  Sun, 10 Mar 2013 18:16:10 +0200
