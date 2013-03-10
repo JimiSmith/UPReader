@@ -53,6 +53,7 @@ MainView {
     function showSubList() {
         hideLoading();
         readerView.visible = true;
+        readerView.refresh();
     }
 
     Auth {

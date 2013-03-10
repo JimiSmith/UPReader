@@ -27,9 +27,6 @@ Page {
 
     FeedModel {
         id: feedModel
-        Component.onCompleted: {
-            feedModel.refresh();
-        }
     }
 
     Connections {
