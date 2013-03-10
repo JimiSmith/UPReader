@@ -112,9 +112,16 @@ void Auth::getNewAccessToken()
         QByteArray json = reply->readAll();
         QJsonDocument sd = QJsonDocument::fromJson(json);
         QVariant result = sd.toVariant();
-
         QVariantMap m = result.toMap();
+
         m_accessToken = m.value("access_token").toString();
+
+        QSettings settings("mrsmith", "upreader");
+        //lets save the access token
+        settings.beginGroup("auth");
+        settings.setValue("accesstoken", m_accessToken);
+        settings.endGroup();
+
         m_netMan->apiGet("token", QMap<QString, QString>(), [this](QNetworkReply *reply) {
             QByteArray out = reply->readAll();
             QSettings settings("mrsmith", "upreader");
